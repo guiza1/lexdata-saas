@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { ModalDetalhesCliente } from './ModalDetalhesCliente';
 
@@ -15,6 +16,7 @@ interface ClienteComMetricas {
 }
 
 export function ClientesView() {
+  const { usuario } = useAuth();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
@@ -47,12 +49,24 @@ export function ClientesView() {
         { data: dataFaturas }
       ] = await Promise.all([
         supabase.from('clientes').select('*').order('nome'),
-        supabase.from('processos').select('cliente_id, valor_causa'),
+        supabase.from('processos').select('cliente_id, valor_causa, responsavel'),
         supabase.from('faturas').select('cliente_id, valor')
       ]);
 
+      const todosProcessos: any[] = dataProcessos || [];
+      const todasFaturas: any[] = dataFaturas || [];
+      const todosClientes: any[] = dataClientes || [];
+
+      // RBAC: Se for advogado associado, filtra apenas clientes com processos sob sua condução
+      const isAdvogado = usuario?.perfil === 'advogado' && usuario.advogadoResponsavel;
+      const processosFiltrados = isAdvogado
+        ? todosProcessos.filter((p: any) => p.responsavel === usuario.advogadoResponsavel)
+        : todosProcessos;
+
+      const idsClientesPermitidos = new Set(processosFiltrados.map((p: any) => p.cliente_id));
+
       const processosPorCliente: Record<number, { count: number; valor: number }> = {};
-      dataProcessos?.forEach((p: any) => {
+      processosFiltrados.forEach((p: any) => {
         if (!processosPorCliente[p.cliente_id]) {
           processosPorCliente[p.cliente_id] = { count: 0, valor: 0 };
         }
@@ -61,20 +75,22 @@ export function ClientesView() {
       });
 
       const faturasPorCliente: Record<number, number> = {};
-      dataFaturas?.forEach((f: any) => {
+      todasFaturas.forEach((f: any) => {
         faturasPorCliente[f.cliente_id] = (faturasPorCliente[f.cliente_id] || 0) + (Number(f.valor) || 0);
       });
 
-      const consolidados: ClienteComMetricas[] = (dataClientes || []).map((c: any) => ({
-        cliente_id: c.cliente_id,
-        nome: c.nome,
-        cidade: c.cidade || 'N/D',
-        uf: c.uf || c.UF || c.estado || 'N/D',
-        segmento: c.segmento || 'Geral',
-        totalProcessos: processosPorCliente[c.cliente_id]?.count || 0,
-        valorTotalCarteira: processosPorCliente[c.cliente_id]?.valor || 0,
-        totalFaturado: faturasPorCliente[c.cliente_id] || 0
-      }));
+      const consolidados: ClienteComMetricas[] = todosClientes
+        .filter((c: any) => !isAdvogado || idsClientesPermitidos.has(c.cliente_id))
+        .map((c: any) => ({
+          cliente_id: c.cliente_id,
+          nome: c.nome,
+          cidade: c.cidade || 'N/D',
+          uf: c.uf || c.UF || c.estado || 'N/D',
+          segmento: c.segmento || 'Geral',
+          totalProcessos: processosPorCliente[c.cliente_id]?.count || 0,
+          valorTotalCarteira: processosPorCliente[c.cliente_id]?.valor || 0,
+          totalFaturado: isAdvogado ? 0 : (faturasPorCliente[c.cliente_id] || 0)
+        }));
 
       setClientes(consolidados);
     } catch (err) {
@@ -86,7 +102,7 @@ export function ClientesView() {
 
   useEffect(() => {
     carregarClientes();
-  }, []);
+  }, [usuario]);
 
   useEffect(() => {
     setPaginaAtual(1);
@@ -158,7 +174,7 @@ export function ClientesView() {
   const exportarCSV = () => {
     if (clientesFiltrados.length === 0) return;
 
-    const cabecalho = ['ID', 'Cliente/Razao Social', 'Cidade', 'UF', 'Segmento', 'Processos Ativos', 'Volume em Causa (€)', 'Faturamento Total (€)'].join(';');
+    const cabecalho = ['ID', 'Cliente/Razao Social', 'Cidade', 'UF', 'Segmento', 'Processos Vinculados', 'Volume em Causa (€)', 'Faturamento Total (€)'].join(';');
     
     const linhas = clientesFiltrados.map(c => [
       c.cliente_id,
@@ -394,17 +410,19 @@ export function ClientesView() {
             <span>[CSV]</span> Exportar Relatório
           </button>
 
-          <button
-            type="button"
-            onClick={abrirModalCriacao}
-            className={`flex items-center gap-1.5 px-4 py-2 text-xs font-semibold uppercase tracking-wider rounded border transition-all cursor-pointer ${
-              isDark
-                ? 'bg-slate-800 hover:bg-slate-700 text-white border-slate-700 hover:border-amber-500/40'
-                : 'bg-slate-900 hover:bg-slate-800 text-white border-slate-900'
-            }`}
-          >
-            <span>+</span> Novo Registro
-          </button>
+          {usuario?.perfil === 'admin' && (
+            <button
+              type="button"
+              onClick={abrirModalCriacao}
+              className={`flex items-center gap-1.5 px-4 py-2 text-xs font-semibold uppercase tracking-wider rounded border transition-all cursor-pointer ${
+                isDark
+                  ? 'bg-slate-800 hover:bg-slate-700 text-white border-slate-700 hover:border-amber-500/40'
+                  : 'bg-slate-900 hover:bg-slate-800 text-white border-slate-900'
+              }`}
+            >
+              <span>+</span> Novo Registro
+            </button>
+          )}
         </div>
       </div>
 
@@ -435,16 +453,18 @@ export function ClientesView() {
                       </span>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={(e) => abrirModalEdicao(c, e)}
-                      title="Editar Dados Cadastrais"
-                      className={`p-1.5 rounded border text-[10px] font-mono transition-colors cursor-pointer ${
-                        isDark ? 'border-slate-700 bg-slate-900 hover:bg-slate-800 text-slate-300' : 'border-slate-200 bg-slate-100 hover:bg-slate-200 text-slate-700'
-                      }`}
-                    >
-                      EDIT
-                    </button>
+                    {usuario?.perfil === 'admin' && (
+                      <button
+                        type="button"
+                        onClick={(e) => abrirModalEdicao(c, e)}
+                        title="Editar Dados Cadastrais"
+                        className={`p-1.5 rounded border text-[10px] font-mono transition-colors cursor-pointer ${
+                          isDark ? 'border-slate-700 bg-slate-900 hover:bg-slate-800 text-slate-300' : 'border-slate-200 bg-slate-100 hover:bg-slate-200 text-slate-700'
+                        }`}
+                      >
+                        EDIT
+                      </button>
+                    )}
                   </div>
 
                   <h4 className={`text-sm font-bold uppercase tracking-wider mb-1 line-clamp-1 group-hover:text-amber-500 transition-colors ${mainTitle}`}>
@@ -513,20 +533,22 @@ export function ClientesView() {
                       {formatarMoeda(c.valorTotalCarteira)}
                     </td>
                     <td className={`p-3.5 text-right font-mono tabular-nums ${mainTitle}`}>
-                      {formatarMoeda(c.totalFaturado)}
+                      {usuario?.perfil === 'admin' ? formatarMoeda(c.totalFaturado) : '—'}
                     </td>
                     <td className="p-3.5 text-center">
                       <div className="flex items-center justify-center gap-2">
-                        <button
-                          type="button"
-                          onClick={(e) => abrirModalEdicao(c, e)}
-                          title="Editar"
-                          className={`px-2 py-1 rounded border text-[10px] font-mono transition-colors cursor-pointer ${
-                            isDark ? 'border-slate-700 bg-slate-900 hover:bg-slate-800 text-slate-300' : 'border-slate-300 bg-slate-100 hover:bg-slate-200 text-slate-700'
-                          }`}
-                        >
-                          EDIT
-                        </button>
+                        {usuario?.perfil === 'admin' && (
+                          <button
+                            type="button"
+                            onClick={(e) => abrirModalEdicao(c, e)}
+                            title="Editar"
+                            className={`px-2 py-1 rounded border text-[10px] font-mono transition-colors cursor-pointer ${
+                              isDark ? 'border-slate-700 bg-slate-900 hover:bg-slate-800 text-slate-300' : 'border-slate-300 bg-slate-100 hover:bg-slate-200 text-slate-700'
+                            }`}
+                          >
+                            EDIT
+                          </button>
+                        )}
                         <span className="text-[10px] font-mono text-amber-500 hover:underline uppercase">
                           Ficha &rarr;
                         </span>
