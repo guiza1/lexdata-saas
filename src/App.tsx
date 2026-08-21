@@ -60,7 +60,7 @@ export default function App() {
             aria-label={isDark ? 'Alternar para modo claro' : 'Alternar para modo escuro'}
             className="h-9 w-9"
           >
-            {isDark ? <IconSun className="w-3.5 h-3.5" /> : <IconMoon className="w-3.5 h-3.5" />}
+            {isDark ? <IconSun className="w-3.5 h-3.5 text-amber-500" /> : <IconMoon className="w-3.5 h-3.5" />}
           </Button>
           <Button
             type="button"
@@ -86,7 +86,7 @@ export default function App() {
               <span className="text-sm font-bold uppercase tracking-wider block">
                 LexData SaaS
               </span>
-              <span className="text-[10px] font-mono text-accent tracking-widest block font-medium">
+              <span className="text-[10px] font-mono text-accent-foreground tracking-widest block font-medium">
                 Legal Intelligence
               </span>
             </div>
@@ -141,7 +141,7 @@ export default function App() {
               onClick={toggleTheme}
               className="flex-1 gap-1.5 text-xs font-medium h-9"
             >
-              {isDark ? <IconSun className="w-3.5 h-3.5 text-accent" /> : <IconMoon className="w-3.5 h-3.5" />}
+              {isDark ? <IconSun className="w-3.5 h-3.5 text-amber-500" /> : <IconMoon className="w-3.5 h-3.5" />}
               <span>{isDark ? 'Claro' : 'Escuro'}</span>
             </Button>
 

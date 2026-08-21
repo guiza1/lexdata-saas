@@ -65,7 +65,7 @@ export function LoginView() {
           aria-label={isDark ? 'Alternar para modo claro' : 'Alternar para modo escuro'}
           className="gap-2 text-xs"
         >
-          {isDark ? <IconSun className="w-3.5 h-3.5 text-accent" /> : <IconMoon className="w-3.5 h-3.5" />}
+          {isDark ? <IconSun className="w-3.5 h-3.5 text-amber-500" /> : <IconMoon className="w-3.5 h-3.5" />}
           <span>{isDark ? 'Modo Claro' : 'Modo Escuro'}</span>
         </Button>
       </header>
@@ -145,22 +145,22 @@ export function LoginView() {
 
             {/* Acesso Diretoria */}
             <button
-              type="button"
+               type="button"
               onClick={() => preencherAcessoRapido('admin@lexdata.com', 'admin')}
-              className="w-full min-h-11 p-3.5 rounded-lg border border-accent/30 bg-accent/5 hover:bg-accent/10 hover:border-accent/60 text-left transition-all flex items-center justify-between group focus-visible:ring-2 focus-visible:ring-accent"
-            >
-              <div>
-                <div className="font-serif text-xs font-bold uppercase tracking-wider text-accent-foreground">
-                  Conselho Diretivo — Visão Consolidada 360°
-                </div>
-                <div className="text-[11px] text-muted-foreground font-mono mt-0.5">
-                  admin@lexdata.com • Acesso irrestrito a todos os dados e advogados
-                </div>
-              </div>
-              <Badge className="text-[10px] font-mono font-bold bg-accent/20 border-accent/40 text-accent-foreground">
-                DIRETORIA
-              </Badge>
-            </button>
+              className="w-full min-h-11 p-3.5 rounded-lg border border-amber-500/30 bg-amber-500/5 hover:bg-amber-500/10 hover:border-amber-500/60 text-left transition-all flex items-center justify-between group focus-visible:ring-2 focus-visible:ring-ring"
+              >
+            <div>
+            <div className="font-serif text-xs font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300">
+            Conselho Diretivo — Visão Consolidada 360°
+            </div>
+    <div className="text-[11px] text-muted-foreground font-mono mt-0.5">
+      admin@lexdata.com • Acesso irrestrito a todos os dados e advogados
+    </div>
+  </div>
+  <Badge className="text-[10px] font-mono font-bold bg-amber-500/20 border-amber-500/40 text-amber-800 dark:text-amber-300">
+    DIRETORIA
+  </Badge>
+</button>
 
             {/* Grid dos Advogados Cadastrados no Banco */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 pt-1">

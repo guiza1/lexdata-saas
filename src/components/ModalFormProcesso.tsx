@@ -261,7 +261,7 @@ export function ModalFormProcesso({ isOpen, onClose, onSuccess, processoParaEdit
               step="0.05"
               value={probSucesso}
               onChange={e => setProbSucesso(parseFloat(e.target.value))}
-              className="w-full h-1.5 bg-border rounded appearance-none cursor-pointer accent-accent"
+              className="w-full h-1.5 bg-border rounded appearance-none cursor-pointer accent-amber-500"
             />
           </div>
 
