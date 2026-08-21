@@ -1,75 +1,109 @@
-# React + TypeScript + Vite
+Markdown
+# ⚖️ LexData SaaS - Legal Intelligence & Business Analytics
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+![React](https://img.shields.io/badge/React-19.0-61DAFB?logo=react&logoColor=black&style=for-the-badge)
+![TypeScript](https://img.shields.io/badge/TypeScript-Strict-3178C6?logo=typescript&logoColor=white&style=for-the-badge)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4.0-06B6D4?logo=tailwind-css&logoColor=white&style=for-the-badge)
+![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?logo=supabase&logoColor=white&style=for-the-badge)
+![Vercel](https://img.shields.io/badge/Vercel-Deployed-000000?logo=vercel&logoColor=white&style=for-the-badge)
 
-Currently, two official plugins are available:
+O **LexData SaaS** é uma plataforma moderna de gestão jurídica e governança de dados criada para modernizar a operação de escritórios de advocacia. A solução centraliza processos, faturamentos e carteira de clientes sob uma arquitetura relacional em nuvem, garantindo segurança, controle de acessos (RBAC) e qualidade de dados em tempo real.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🚀 Acesso ao Ambiente de Produção
 
-## React Compiler
+O projeto conta com CI/CD configurado e está disponível publicamente via Vercel.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+🔗 **Live Demo:** [https://lexdata-saas.vercel.app](https://lexdata-saas.vercel.app) *(Nota: ajuste para o seu link real da Vercel se necessário)*
 
-## Expanding the ESLint configuration
+### 🔑 Credenciais de Acesso Rápido (Demonstração)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+A plataforma possui controle de acesso baseado em papéis (RBAC). Para avaliar as diferentes visões e privilégios de dados, utilize as contas abaixo:
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+| Perfil | E-mail | Palavra-passe | Escopo de Visão |
+| :--- | :--- | :--- | :--- |
+| **Diretoria (Admin)** | `admin@lexdata.com` | `admin` | Visão 360° global, indicadores financeiros totais e acesso à auditoria. |
+| **Advogado (Associado)** | `bruno@lexdata.com` | `123` | Visão isolada (apenas seus processos e clientes vinculados). |
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+---
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## 🎯 Entregáveis do Projeto (Checklist Acadêmico)
 
-```
+Este repositório cumpre os requisitos propostos para a entrega final:
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+- [x] **1. Base Centralizada:** Banco de dados PostgreSQL (Supabase) operando na 3ª Forma Normal (3FN).
+- [x] **2. Painel Executivo:** Dashboard com KPIs financeiros, gráficos de performance e pipeline em Kanban.
+- [x] **3. Dicionário de Dados:** Documentação técnica padrão ISO/IEC 11179 nativa no sistema (Aba Auditoria).
+- [x] **4. Guia de Processo e Governança:** Módulo de auditoria em tempo real avaliando Completude e Integridade Referencial (FKs).
+- [x] **5. Exportação de Dados:** Geração de relatórios operacionais consolidados em `.CSV`.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+---
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## 🏗️ Arquitetura e Modelo de Dados (DER)
 
-```
+A base de dados foi projetada visando integridade referencial estrita e ausência de redundâncias anômalas, respeitando o modelo relacional:
+
+```text
+[ clientes ] 1 ─── N [ processos ]
+[ clientes ] 1 ─── N [ faturas ]
+[ faturas ]  1 ─── N [ pagamentos ]
+Clientes: Entidade mestre (cliente_id PK). Minimiza duplicação de dados cadastrais.
+
+Processos: Armazena autos e metadados (processo_id PK, cliente_id FK). Define a responsabilidade do advogado e probabilidade de êxito.
+
+Faturas & Pagamentos: Separação contábil entre a emissão da cobrança e as liquidações parciais/totais em fluxo de caixa.
+
+🛡️ Governança e Segurança de Dados
+Minimização de Privilégios (RBAC): Os advogados associados não possuem acesso ao faturamento global do escritório, nem aos processos/clientes conduzidos exclusivamente por outros colegas. Isso evita conflito de interesses e vazamento de carteira.
+
+Conformidade LGPD/GDPR: O sistema minimiza a exposição de dados pessoais. O cliente_id anonimiza as chaves relacionais, limitando o acesso da camada de visualização apenas ao que é estritamente necessário para o perfil logado.
+
+Auditoria Contínua: A plataforma possui um scanner que avalia o schema e calcula a taxa de completude dos autos judiciais e averigua vínculos órfãos de relacionamentos.
+
+💻 Como Rodar o Projeto Localmente
+Pré-requisitos
+Node.js v18+
+
+Gestor de pacotes (npm, pnpm ou yarn)
+
+Conta no Supabase (para as chaves de API)
+
+1. Clonar o repositório
+Bash
+git clone [https://github.com/seu-usuario/lexdata-saas.git](https://github.com/seu-usuario/lexdata-saas.git)
+cd lexdata-saas
+2. Instalar dependências
+Bash
+npm install
+3. Variáveis de Ambiente
+Crie um ficheiro .env na raiz do projeto e adicione as suas credenciais do Supabase:
+
+Fragmento do código
+VITE_SUPABASE_URL=sua_url_do_supabase_aqui
+VITE_SUPABASE_ANON_KEY=sua_chave_anon_do_supabase_aqui
+4. Executar o servidor de desenvolvimento
+Bash
+npm run dev
+A aplicação estará disponível em http://localhost:5173.
+
+🛠️ Stack Tecnológica
+Frontend: React 19, TypeScript, Vite
+
+Estilização: Tailwind CSS v4
+
+Backend as a Service (BaaS): Supabase (PostgreSQL, Auth, PostgREST API)
+
+Deploy e CI/CD: Vercel
+
+Ícones: SVG customizados (Lucide-inspired)
+
+Desenvolvido com rigor técnico e foco em governança de dados corporativos. 📊
+
+
+### O que fazer agora?
+
+1. No terminal, execute:
+   ```bash
+   git add README.md
+   git commit -m "docs: create professional README for project presentation"
+   git push origin main
+Ao acessar o seu repositório no GitHub, você verá esta apresentação linda renderizada logo abaixo dos seus arquivos, pronta para impressionar quem for avaliar o seu código.
