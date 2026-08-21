@@ -144,8 +144,6 @@ npm run build
 
 ---
 
-<div align="center">
 
-<sub>Desenvolvido sob rigor técnico de engenharia de software, modelagem relacional 3FN e governança de dados corporativos.</sub>
 
-</div>
+Desenvolvido sob rigor técnico de engenharia de software, modelagem relacional 3FN e governança de dados corporativos.
