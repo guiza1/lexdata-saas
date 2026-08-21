@@ -52,6 +52,7 @@ O sistema implementa isolamento granular de privilégios entre a governança exe
 
 A estrutura relacional foi modelada para assegurar integridade estrita e eliminar redundâncias anômalas:
 
+```text
 
 ┌──────────────┐         1:N         ┌──────────────┐
 │   clientes   │────────────────────<│  processos   │
