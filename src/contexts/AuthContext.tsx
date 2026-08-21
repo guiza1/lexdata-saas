@@ -10,7 +10,7 @@ export interface Usuario {
   cargo: string;
 }
 
-export const USUARIOS_MOCK: { [email: string]: { senha: string; usuario: Usuario } } = {
+export const USUARIOS_MOCK: Record<string, { senha: string; usuario: Usuario }> = {
   'admin@lexdata.com': {
     senha: 'admin',
     usuario: {
@@ -102,16 +102,25 @@ interface AuthContextType {
   logout: () => void;
 }
 
-const AuthContext = createContext<AuthContextType>({} as AuthContextType);
+const AuthContext = createContext<AuthContextType>({
+  usuario: null,
+  login: () => false,
+  logout: () => {}
+});
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [usuario, setUsuario] = useState<Usuario | null>(() => {
-    const salvo = localStorage.getItem('lexdata_user');
-    return salvo ? JSON.parse(salvo) : null;
+    try {
+      const salvo = localStorage.getItem('lexdata_user');
+      return salvo ? JSON.parse(salvo) : null;
+    } catch {
+      return null;
+    }
   });
 
   const login = (email: string, pass: string): boolean => {
-    const conta = USUARIOS_MOCK[email.trim().toLowerCase()];
+    const emailLimpo = email.trim().toLowerCase();
+    const conta = USUARIOS_MOCK[emailLimpo];
     if (conta && conta.senha === pass) {
       setUsuario(conta.usuario);
       localStorage.setItem('lexdata_user', JSON.stringify(conta.usuario));
@@ -133,5 +142,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 }
 
 export function useAuth() {
-  return useContext(AuthContext);
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth deve ser utilizado dentro de um AuthProvider');
+  }
+  return context;
 }

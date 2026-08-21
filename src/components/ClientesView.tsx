@@ -222,8 +222,9 @@ export function ClientesView() {
                 {clienteParaEditar ? `Editar Cadastro #${clienteParaEditar.cliente_id}` : 'Novo Registro Cadastral'}
               </h3>
               <button
+                type="button"
                 onClick={() => setModalCadastroAberto(false)}
-                className={`w-7 h-7 rounded border flex items-center justify-center text-xs font-mono ${
+                className={`w-7 h-7 rounded border flex items-center justify-center text-xs font-mono cursor-pointer ${
                   isDark ? 'border-slate-700 bg-slate-800 text-slate-300' : 'border-slate-300 bg-slate-100 text-slate-700'
                 }`}
               >
@@ -233,7 +234,7 @@ export function ClientesView() {
 
             <form onSubmit={handleSalvarCliente} className="p-6 space-y-4 text-xs">
               {erroForm && (
-                <div className="p-3 bg-red-950/40 border border-red-900/60 text-red-300 rounded">
+                <div className="p-3 bg-red-950/40 border border-red-900/60 text-red-300 rounded font-mono">
                   {erroForm}
                 </div>
               )}
@@ -303,7 +304,7 @@ export function ClientesView() {
                 <button
                   type="button"
                   onClick={() => setModalCadastroAberto(false)}
-                  className={`px-4 py-2 rounded text-xs font-semibold border ${
+                  className={`px-4 py-2 rounded text-xs font-semibold border cursor-pointer ${
                     isDark ? 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-300'
                   }`}
                 >
@@ -312,7 +313,7 @@ export function ClientesView() {
                 <button
                   type="submit"
                   disabled={salvando}
-                  className="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 hover:border-amber-500/40 text-xs font-semibold rounded uppercase tracking-wider disabled:opacity-50"
+                  className="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 hover:border-amber-500/40 text-xs font-semibold rounded uppercase tracking-wider disabled:opacity-50 cursor-pointer"
                 >
                   {salvando ? 'Gravando...' : clienteParaEditar ? 'Salvar Alterações' : 'Cadastrar Cliente'}
                 </button>
@@ -339,8 +340,9 @@ export function ClientesView() {
 
           <div className={`p-1 rounded border flex items-center gap-1 ${isDark ? 'bg-[#090D16] border-slate-800' : 'bg-slate-100 border-slate-200'}`}>
             <button
+              type="button"
               onClick={() => setVisualizacao('cards')}
-              className={`px-3 py-1 rounded text-xs font-semibold uppercase tracking-wider transition-colors ${
+              className={`px-3 py-1 rounded text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer ${
                 visualizacao === 'cards'
                   ? isDark ? 'bg-slate-800 text-amber-300 shadow-sm border border-slate-700' : 'bg-white text-slate-900 shadow-sm border border-slate-300'
                   : subText
@@ -349,8 +351,9 @@ export function ClientesView() {
               Cards
             </button>
             <button
+              type="button"
               onClick={() => setVisualizacao('lista')}
-              className={`px-3 py-1 rounded text-xs font-semibold uppercase tracking-wider transition-colors ${
+              className={`px-3 py-1 rounded text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer ${
                 visualizacao === 'lista'
                   ? isDark ? 'bg-slate-800 text-amber-300 shadow-sm border border-slate-700' : 'bg-white text-slate-900 shadow-sm border border-slate-300'
                   : subText
@@ -379,8 +382,9 @@ export function ClientesView() {
 
         <div className="flex items-center gap-2">
           <button
+            type="button"
             onClick={exportarCSV}
-            className={`flex items-center gap-1.5 px-3.5 py-2 text-xs font-mono font-semibold rounded border transition-colors ${
+            className={`flex items-center gap-1.5 px-3.5 py-2 text-xs font-mono font-semibold rounded border transition-colors cursor-pointer ${
               isDark
                 ? 'bg-slate-900 hover:bg-slate-800 text-emerald-400 border-emerald-800/40'
                 : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-300'
@@ -391,8 +395,9 @@ export function ClientesView() {
           </button>
 
           <button
+            type="button"
             onClick={abrirModalCriacao}
-            className={`flex items-center gap-1.5 px-4 py-2 text-xs font-semibold uppercase tracking-wider rounded border transition-all ${
+            className={`flex items-center gap-1.5 px-4 py-2 text-xs font-semibold uppercase tracking-wider rounded border transition-all cursor-pointer ${
               isDark
                 ? 'bg-slate-800 hover:bg-slate-700 text-white border-slate-700 hover:border-amber-500/40'
                 : 'bg-slate-900 hover:bg-slate-800 text-white border-slate-900'
@@ -431,9 +436,10 @@ export function ClientesView() {
                     </div>
 
                     <button
+                      type="button"
                       onClick={(e) => abrirModalEdicao(c, e)}
                       title="Editar Dados Cadastrais"
-                      className={`p-1.5 rounded border text-[10px] font-mono transition-colors ${
+                      className={`p-1.5 rounded border text-[10px] font-mono transition-colors cursor-pointer ${
                         isDark ? 'border-slate-700 bg-slate-900 hover:bg-slate-800 text-slate-300' : 'border-slate-200 bg-slate-100 hover:bg-slate-200 text-slate-700'
                       }`}
                     >
@@ -512,9 +518,10 @@ export function ClientesView() {
                     <td className="p-3.5 text-center">
                       <div className="flex items-center justify-center gap-2">
                         <button
+                          type="button"
                           onClick={(e) => abrirModalEdicao(c, e)}
                           title="Editar"
-                          className={`px-2 py-1 rounded border text-[10px] font-mono transition-colors ${
+                          className={`px-2 py-1 rounded border text-[10px] font-mono transition-colors cursor-pointer ${
                             isDark ? 'border-slate-700 bg-slate-900 hover:bg-slate-800 text-slate-300' : 'border-slate-300 bg-slate-100 hover:bg-slate-200 text-slate-700'
                           }`}
                         >
@@ -543,9 +550,10 @@ export function ClientesView() {
 
         <div className="flex items-center gap-2 font-mono">
           <button
+            type="button"
             disabled={paginaAtual === 1}
             onClick={() => setPaginaAtual(prev => Math.max(prev - 1, 1))}
-            className={`px-3 py-1.5 rounded border text-xs font-semibold transition-colors disabled:opacity-40 ${
+            className={`px-3 py-1.5 rounded border text-xs font-semibold transition-colors disabled:opacity-40 cursor-pointer ${
               isDark ? 'bg-slate-900 border-slate-800 hover:bg-slate-800 text-slate-300' : 'bg-slate-50 border-slate-300 hover:bg-slate-100 text-slate-700'
             }`}
           >
@@ -559,9 +567,10 @@ export function ClientesView() {
           </span>
 
           <button
+            type="button"
             disabled={paginaAtual === totalPaginas}
             onClick={() => setPaginaAtual(prev => Math.min(prev + 1, totalPaginas))}
-            className={`px-3 py-1.5 rounded border text-xs font-semibold transition-colors disabled:opacity-40 ${
+            className={`px-3 py-1.5 rounded border text-xs font-semibold transition-colors disabled:opacity-40 cursor-pointer ${
               isDark ? 'bg-slate-900 border-slate-800 hover:bg-slate-800 text-slate-300' : 'bg-slate-50 border-slate-300 hover:bg-slate-100 text-slate-700'
             }`}
           >
