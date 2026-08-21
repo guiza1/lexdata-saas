@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { useTheme } from '../contexts/ThemeContext';
 import {
   DragDropContext,
   Droppable,
@@ -34,9 +33,7 @@ interface FeedbackNotificacao {
 }
 
 export function KanbanBoard() {
-  const { usuario } = useAuth();
-  const { theme } = useTheme();
-  const isDark = theme === 'dark';
+  const { usuario } = useAuth();  
 
   const [processos, setProcessos] = useState<ProcessoKanban[]>([]);
   const [etapas, setEtapas] = useState<string[]>([]);

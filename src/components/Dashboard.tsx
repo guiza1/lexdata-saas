@@ -257,7 +257,7 @@ export function Dashboard() {
 
         <div className="flex items-center gap-3">
           <label htmlFor="ano-fiscal" className="text-xs font-medium text-muted-foreground">Exercício Fiscal:</label>
-          <Select value={anoSelecionado} onValueChange={setAnoSelecionado}>
+          <Select value={anoSelecionado} onValueChange={(value) => value && setAnoSelecionado(value)}>
             <SelectTrigger id="ano-fiscal" className="w-56 text-xs font-semibold">
               <SelectValue />
             </SelectTrigger>
