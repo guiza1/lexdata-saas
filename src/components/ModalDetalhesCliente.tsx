@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { useTheme } from '../contexts/ThemeContext';
 import { IconScale, IconUsers } from './Icons';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 interface ModalDetalhesClienteProps {
   clienteId: number | null;
@@ -9,9 +11,6 @@ interface ModalDetalhesClienteProps {
 }
 
 export function ModalDetalhesCliente({ clienteId, onClose }: ModalDetalhesClienteProps) {
-  const { theme } = useTheme();
-  const isDark = theme === 'dark';
-
   const [detalhes, setDetalhes] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -35,7 +34,7 @@ export function ModalDetalhesCliente({ clienteId, onClose }: ModalDetalhesClient
 
         const totalCausa = listaProcessos.reduce((acc: number, p: any) => acc + (Number(p.valor_causa) || 0), 0);
         const totalFaturado = listaFaturas.reduce((acc: number, f: any) => acc + (Number(f.valor) || 0), 0);
-        
+
         let totalPago = 0;
         listaFaturas.forEach((f: any) => {
           if (f.pagamentos && Array.isArray(f.pagamentos)) {
@@ -67,8 +66,6 @@ export function ModalDetalhesCliente({ clienteId, onClose }: ModalDetalhesClient
     carregarFichaCliente();
   }, [clienteId]);
 
-  if (!clienteId) return null;
-
   const formatarMoeda = (val: number) =>
     new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' }).format(val || 0);
 
@@ -77,82 +74,58 @@ export function ModalDetalhesCliente({ clienteId, onClose }: ModalDetalhesClient
     return new Date(dataStr).toLocaleDateString('pt-PT');
   };
 
-  const modalBg = isDark ? 'bg-[#0E1424] border-slate-800' : 'bg-white border-slate-200';
-  const headerBg = isDark ? 'bg-[#090D16]/90 border-slate-800' : 'bg-slate-50 border-slate-200';
-  const cardItemBg = isDark ? 'bg-[#090D16] border-slate-800/80' : 'bg-slate-50 border-slate-200';
-  const textTitle = isDark ? 'text-white' : 'text-slate-900';
-  const textSub = isDark ? 'text-slate-400' : 'text-slate-500';
-  const subText = textSub;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-150 font-sans">
-      <div className={`border rounded-lg max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden transition-colors ${modalBg}`}>
-        
-        {/* Cabeçalho */}
-        <div className={`p-6 border-b flex justify-between items-start ${headerBg}`}>
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${
-                isDark ? 'bg-amber-500/10 border-amber-500/30 text-amber-300' : 'bg-amber-50 border-amber-200 text-amber-800'
-              }`}>
-                CLIENTE ID #{detalhes?.cliente?.cliente_id || clienteId}
-              </span>
-              <span className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
-                isDark ? 'bg-slate-800 border-slate-700 text-slate-300' : 'bg-slate-100 border-slate-300 text-slate-700'
-              }`}>
-                {detalhes?.cliente?.cidade || 'N/D'} • {detalhes?.cliente?.uf || detalhes?.cliente?.UF || 'N/D'}
-              </span>
-            </div>
+    <Dialog open={!!clienteId} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="w-[calc(100%-2rem)] sm:max-w-3xl max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden font-sans">
 
-            <h2 className={`text-lg font-bold uppercase tracking-wider ${textTitle}`}>
-              {detalhes?.cliente?.nome || 'Ficha Cadastral do Cliente'}
-            </h2>
-            <p className={`text-xs mt-0.5 ${textSub}`}>
-              Segmento de Mercado: <strong className={isDark ? 'text-slate-200' : 'text-slate-700'}>{detalhes?.cliente?.segmento || 'Geral'}</strong>
-            </p>
+        {/* Cabeçalho */}
+        <DialogHeader className="p-4 sm:p-6 border-b border-border">
+          <div className="flex flex-wrap items-center gap-2 mb-2">
+            <Badge className="text-[10px] font-mono font-bold bg-accent/15 border-accent/30 text-accent-foreground">
+              CLIENTE ID #{detalhes?.cliente?.cliente_id || clienteId}
+            </Badge>
+            <Badge variant="secondary" className="text-[10px] font-mono">
+              {detalhes?.cliente?.cidade || 'N/D'} • {detalhes?.cliente?.uf || detalhes?.cliente?.UF || 'N/D'}
+            </Badge>
           </div>
 
-          <button
-            onClick={onClose}
-            className={`w-7 h-7 rounded border flex items-center justify-center text-xs font-mono transition-colors ${
-              isDark
-                ? 'border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-300'
-                : 'border-slate-300 bg-slate-100 hover:bg-slate-200 text-slate-700'
-            }`}
-          >
-            ✕
-          </button>
-        </div>
+          <DialogTitle className="text-base sm:text-lg font-bold uppercase tracking-wider break-words pr-6">
+            {detalhes?.cliente?.nome || 'Ficha Cadastral do Cliente'}
+          </DialogTitle>
+          <p className="text-xs mt-0.5 text-muted-foreground">
+            Segmento de Mercado: <strong className="text-foreground">{detalhes?.cliente?.segmento || 'Geral'}</strong>
+          </p>
+        </DialogHeader>
 
         {/* Conteúdo com Rolagem */}
-        <div className="p-6 overflow-y-auto space-y-6 flex-1 text-xs">
+        <div className="p-4 sm:p-6 overflow-y-auto space-y-6 flex-1 text-xs">
           {loading ? (
-            <div className="text-center py-16 font-mono text-slate-400">Consolidando dados relacionais da conta...</div>
-          ) : (
+            <div className="text-center py-16 font-mono text-muted-foreground">Consolidando dados relacionais da conta...</div>
+          ) : detalhes ? (
             <>
               {/* KPIs de Resumo */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className={`p-3.5 rounded-md border ${cardItemBg}`}>
-                  <span className={`text-[10px] uppercase font-mono tracking-wider block font-semibold ${subText}`}>Processos</span>
-                  <span className={`text-xl font-bold font-mono mt-1 block ${textTitle}`}>
+                <div className="p-3.5 rounded-md border border-border bg-surface-sunken min-w-0">
+                  <span className="text-[10px] uppercase font-mono tracking-wider block font-semibold text-muted-foreground">Processos</span>
+                  <span className="text-xl font-bold font-mono mt-1 block">
                     {detalhes.resumo.totalProcessos}
                   </span>
                 </div>
-                <div className={`p-3.5 rounded-md border ${cardItemBg}`}>
-                  <span className={`text-[10px] uppercase font-mono tracking-wider block font-semibold ${subText}`}>Volume em Causa</span>
-                  <span className="text-lg font-mono font-bold text-blue-500 mt-1 block tabular-nums">
+                <div className="p-3.5 rounded-md border border-border bg-surface-sunken min-w-0">
+                  <span className="text-[10px] uppercase font-mono tracking-wider block font-semibold text-muted-foreground">Volume em Causa</span>
+                  <span className="text-lg font-mono font-bold text-blue-600 dark:text-blue-400 mt-1 block tabular-nums truncate">
                     {formatarMoeda(detalhes.resumo.totalCausa)}
                   </span>
                 </div>
-                <div className={`p-3.5 rounded-md border ${cardItemBg}`}>
-                  <span className={`text-[10px] uppercase font-mono tracking-wider block font-semibold ${subText}`}>Honorários Pagos</span>
-                  <span className="text-lg font-mono font-bold text-emerald-500 mt-1 block tabular-nums">
+                <div className="p-3.5 rounded-md border border-border bg-surface-sunken min-w-0">
+                  <span className="text-[10px] uppercase font-mono tracking-wider block font-semibold text-muted-foreground">Honorários Pagos</span>
+                  <span className="text-lg font-mono font-bold text-emerald-600 dark:text-emerald-400 mt-1 block tabular-nums truncate">
                     {formatarMoeda(detalhes.resumo.totalPago)}
                   </span>
                 </div>
-                <div className={`p-3.5 rounded-md border ${cardItemBg}`}>
-                  <span className={`text-[10px] uppercase font-mono tracking-wider block font-semibold ${subText}`}>Saldo Pendente</span>
-                  <span className={`text-lg font-mono font-bold mt-1 block tabular-nums ${detalhes.resumo.totalPendente > 0 ? 'text-amber-500' : subText}`}>
+                <div className="p-3.5 rounded-md border border-border bg-surface-sunken min-w-0">
+                  <span className="text-[10px] uppercase font-mono tracking-wider block font-semibold text-muted-foreground">Saldo Pendente</span>
+                  <span className={`text-lg font-mono font-bold mt-1 block tabular-nums truncate ${detalhes.resumo.totalPendente > 0 ? 'text-accent-foreground' : 'text-muted-foreground'}`}>
                     {formatarMoeda(detalhes.resumo.totalPendente)}
                   </span>
                 </div>
@@ -160,17 +133,13 @@ export function ModalDetalhesCliente({ clienteId, onClose }: ModalDetalhesClient
 
               {/* Processos Judiciais */}
               <div>
-                <div className="flex justify-between items-center mb-3">
-                  <h3 className={`text-xs font-semibold uppercase tracking-wider flex items-center gap-2 ${textTitle}`}>
-                    <IconScale className="w-3.5 h-3.5 text-amber-500" />
-                    <span>Processos Judiciais Vinculados ({detalhes.processos.length})</span>
-                  </h3>
-                </div>
+                <h3 className="text-xs font-semibold uppercase tracking-wider flex items-center gap-2 mb-3">
+                  <IconScale className="w-3.5 h-3.5 text-accent-foreground flex-shrink-0" />
+                  <span>Processos Judiciais Vinculados ({detalhes.processos.length})</span>
+                </h3>
 
                 {detalhes.processos.length === 0 ? (
-                  <div className={`p-4 text-center font-mono text-[11px] rounded-md border border-dashed ${
-                    isDark ? 'border-slate-800 text-slate-500 bg-[#090D16]/50' : 'border-slate-200 text-slate-400 bg-slate-50'
-                  }`}>
+                  <div className="p-4 text-center font-mono text-[11px] rounded-md border border-dashed border-border text-muted-foreground bg-surface-sunken/50">
                     Nenhum processo judicial ativo registrado para este cliente.
                   </div>
                 ) : (
@@ -178,34 +147,32 @@ export function ModalDetalhesCliente({ clienteId, onClose }: ModalDetalhesClient
                     {detalhes.processos.map((proc: any) => (
                       <div
                         key={proc.processo_id}
-                        className={`p-3.5 rounded-md border flex flex-wrap justify-between items-center gap-3 transition-colors ${cardItemBg}`}
+                        className="p-3.5 rounded-md border border-border bg-surface-sunken flex flex-wrap justify-between items-start gap-3"
                       >
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <span className="font-mono font-semibold text-blue-500 text-[11px]">
+                        <div className="space-y-1 min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="font-mono font-semibold text-blue-600 dark:text-blue-400 text-[11px]">
                               {proc.numero_processo}
                             </span>
-                            <span className={`px-2 py-0.5 rounded text-[10px] font-mono border ${
-                              isDark ? 'bg-slate-800 border-slate-700 text-slate-300' : 'bg-slate-200 border-slate-300 text-slate-700'
-                            }`}>
+                            <Badge variant="secondary" className="text-[10px] font-mono">
                               {proc.area}
-                            </span>
-                            <span className={`font-medium ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
+                            </Badge>
+                            <span className="font-medium break-words">
                               {proc.tipo}
                             </span>
                           </div>
-                          <div className={`text-[11px] flex gap-4 ${textSub}`}>
-                            <span>Advogado: <strong className={isDark ? 'text-slate-300' : 'text-slate-700'}>{proc.responsavel}</strong></span>
-                            <span>Fase: <strong className={isDark ? 'text-slate-300' : 'text-slate-700'}>{proc.etapa_atual}</strong></span>
-                            <span className="font-mono text-emerald-500 font-semibold tabular-nums">
+                          <div className="text-[11px] flex flex-wrap gap-x-4 gap-y-1 text-muted-foreground">
+                            <span>Advogado: <strong className="text-foreground">{proc.responsavel}</strong></span>
+                            <span>Fase: <strong className="text-foreground">{proc.etapa_atual}</strong></span>
+                            <span className="font-mono text-emerald-600 dark:text-emerald-400 font-semibold tabular-nums">
                               Êxito: {Math.round((proc.prob_sucesso || 0) * 100)}%
                             </span>
                           </div>
                         </div>
 
-                        <div className="text-right">
-                          <span className={`text-[10px] uppercase font-mono block ${textSub}`}>Valor em Causa</span>
-                          <span className={`font-mono font-bold text-xs tabular-nums ${textTitle}`}>
+                        <div className="text-right flex-shrink-0">
+                          <span className="text-[10px] uppercase font-mono block text-muted-foreground">Valor em Causa</span>
+                          <span className="font-mono font-bold text-xs tabular-nums">
                             {formatarMoeda(proc.valor_causa)}
                           </span>
                         </div>
@@ -217,15 +184,13 @@ export function ModalDetalhesCliente({ clienteId, onClose }: ModalDetalhesClient
 
               {/* Histórico Financeiro */}
               <div>
-                <h3 className={`text-xs font-semibold uppercase tracking-wider mb-3 flex items-center gap-2 ${textTitle}`}>
-                  <IconUsers className="w-3.5 h-3.5 text-amber-500" />
-                  <span>Faturamento & Honorários Emitidos ({detalhes.faturas.length})</span>
+                <h3 className="text-xs font-semibold uppercase tracking-wider mb-3 flex items-center gap-2">
+                  <IconUsers className="w-3.5 h-3.5 text-accent-foreground flex-shrink-0" />
+                  <span>Faturamento &amp; Honorários Emitidos ({detalhes.faturas.length})</span>
                 </h3>
 
                 {detalhes.faturas.length === 0 ? (
-                  <div className={`p-4 text-center font-mono text-[11px] rounded-md border border-dashed ${
-                    isDark ? 'border-slate-800 text-slate-500 bg-[#090D16]/50' : 'border-slate-200 text-slate-400 bg-slate-50'
-                  }`}>
+                  <div className="p-4 text-center font-mono text-[11px] rounded-md border border-dashed border-border text-muted-foreground bg-surface-sunken/50">
                     Nenhuma fatura emitida para este cliente.
                   </div>
                 ) : (
@@ -238,34 +203,32 @@ export function ModalDetalhesCliente({ clienteId, onClose }: ModalDetalhesClient
                       return (
                         <div
                           key={fat.fatura_id}
-                          className={`p-3 rounded-md border flex items-center justify-between ${cardItemBg}`}
+                          className="p-3 rounded-md border border-border bg-surface-sunken flex flex-wrap items-center justify-between gap-2"
                         >
-                          <div className="space-y-0.5">
-                            <div className="flex items-center gap-2">
-                              <span className={`font-mono font-medium ${textTitle}`}>
+                          <div className="space-y-0.5 min-w-0">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="font-mono font-medium">
                                 FATURA #{fat.fatura_id}
                               </span>
-                              <span
-                                className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold border ${
-                                  isLiquidada || (fat.status || '').toLowerCase() === 'pago'
-                                    ? isDark ? 'bg-emerald-950/40 text-emerald-400 border-emerald-800/50' : 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                    : isDark ? 'bg-amber-950/40 text-amber-400 border-amber-800/50' : 'bg-amber-50 text-amber-700 border-amber-200'
-                                }`}
-                              >
+                              <Badge className={
+                                isLiquidada || (fat.status || '').toLowerCase() === 'pago'
+                                  ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30'
+                                  : 'bg-accent/15 text-accent-foreground border-accent/30'
+                              }>
                                 {isLiquidada ? 'LIQUIDADA' : (fat.status || 'PENDENTE').toUpperCase()}
-                              </span>
+                              </Badge>
                             </div>
-                            <span className={`text-[11px] font-mono block ${textSub}`}>
+                            <span className="text-[11px] font-mono block text-muted-foreground">
                               Vencimento: {formatarData(fat.data_vencimento || fat.data_emissao || fat.data)}
                             </span>
                           </div>
 
-                          <div className="text-right">
-                            <span className={`text-xs font-bold font-mono block tabular-nums ${textTitle}`}>
+                          <div className="text-right flex-shrink-0">
+                            <span className="text-xs font-bold font-mono block tabular-nums">
                               {formatarMoeda(valorFatura)}
                             </span>
                             {pagoNaFat > 0 && (
-                              <span className="text-[10px] text-emerald-500 font-mono tabular-nums">
+                              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono tabular-nums">
                                 Quitado: {formatarMoeda(pagoNaFat)}
                               </span>
                             )}
@@ -277,23 +240,16 @@ export function ModalDetalhesCliente({ clienteId, onClose }: ModalDetalhesClient
                 )}
               </div>
             </>
-          )}
+          ) : null}
         </div>
 
         {/* Rodapé */}
-        <div className={`p-4 border-t flex justify-end ${headerBg}`}>
-          <button
-            onClick={onClose}
-            className={`px-5 py-2 text-xs font-semibold rounded border transition-colors ${
-              isDark
-                ? 'bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700'
-                : 'bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-300'
-            }`}
-          >
-            Fechar Ficha
-          </button>
-        </div>
-      </div>
-    </div>
+        <DialogFooter className="p-4 border-t border-border">
+  <Button type="button" variant="outline" onClick={onClose} className="text-xs font-semibold">
+    Fechar Ficha
+  </Button>
+</DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

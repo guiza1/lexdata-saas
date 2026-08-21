@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { useTheme } from '../contexts/ThemeContext';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 interface ModalFormProcessoProps {
   isOpen: boolean;
@@ -10,15 +12,11 @@ interface ModalFormProcessoProps {
 }
 
 export function ModalFormProcesso({ isOpen, onClose, onSuccess, processoParaEditar }: ModalFormProcessoProps) {
-  const { theme } = useTheme();
-  const isDark = theme === 'dark';
-
   const [clientes, setClientes] = useState<{ cliente_id: number; nome: string }[]>([]);
   const [etapas, setEtapas] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
 
-  // Form State
   const [clienteId, setClienteId] = useState<number | ''>('');
   const [numeroProcesso, setNumeroProcesso] = useState('');
   const [area, setArea] = useState('Trabalhista');
@@ -65,8 +63,6 @@ export function ModalFormProcesso({ isOpen, onClose, onSuccess, processoParaEdit
       setErro(null);
     }
   }, [isOpen, processoParaEditar]);
-
-  if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -116,66 +112,49 @@ export function ModalFormProcesso({ isOpen, onClose, onSuccess, processoParaEdit
     }
   };
 
-  const cardBg = isDark ? 'bg-[#0E1424] border-slate-800' : 'bg-white border-slate-200 shadow-sm';
-  const subText = isDark ? 'text-slate-400' : 'text-slate-500';
-  const mainTitle = isDark ? 'text-slate-100' : 'text-slate-900';
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-150 font-sans">
-      <div className={`border rounded-lg max-w-lg w-full shadow-2xl overflow-hidden ${cardBg}`}>
-        
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="w-[calc(100%-2rem)] sm:max-w-lg max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden font-sans">
+
         {/* Cabeçalho */}
-        <div className={`p-5 border-b flex justify-between items-center ${isDark ? 'bg-[#090D16]/90 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
-          <div>
-            <h2 className={`text-sm font-serif font-bold uppercase tracking-wider ${mainTitle}`}>
-              {processoParaEditar ? 'Editar Autos Processuais' : 'Abertura de Autos Judiciais'}
-            </h2>
-            <p className={`text-[11px] ${subText}`}>
-              {processoParaEditar ? 'Atualização de parâmetros e fase' : 'Registro de nova demanda no pipeline'}
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className={`w-7 h-7 rounded border flex items-center justify-center text-xs font-mono ${
-              isDark ? 'border-slate-700 bg-slate-800 text-slate-300' : 'border-slate-300 bg-slate-100 text-slate-700'
-            }`}
-          >
-            ✕
-          </button>
-        </div>
+        <DialogHeader className="p-4 sm:p-5 border-b border-border">
+          <DialogTitle className="text-sm font-serif font-bold uppercase tracking-wider pr-6">
+            {processoParaEditar ? 'Editar Autos Processuais' : 'Abertura de Autos Judiciais'}
+          </DialogTitle>
+          <p className="text-[11px] text-muted-foreground">
+            {processoParaEditar ? 'Atualização de parâmetros e fase' : 'Registro de nova demanda no pipeline'}
+          </p>
+        </DialogHeader>
 
         {/* Formulário */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 text-xs">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 text-xs overflow-y-auto flex-1">
           {erro && (
-            <div className="p-3 bg-red-950/40 border border-red-900/60 text-red-300 rounded">
+            <div role="alert" className="p-3 bg-red-950/40 border border-red-900/60 text-red-300 rounded">
               {erro}
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className={`block font-medium mb-1 uppercase tracking-wider text-[10px] ${subText}`}>Nº dos Autos *</label>
-              <input
+              <label htmlFor="numero-processo" className="block font-medium mb-1 uppercase tracking-wider text-[10px] text-muted-foreground">Nº dos Autos *</label>
+              <Input
+                id="numero-processo"
                 type="text"
                 placeholder="Ex: 5001234-88.2024.8.00"
                 value={numeroProcesso}
                 onChange={e => setNumeroProcesso(e.target.value)}
-                className={`w-full border rounded px-3 py-2 text-xs font-mono focus:outline-none ${
-                  isDark ? 'bg-[#090D16] border-slate-800 text-white focus:border-amber-500' : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-slate-800'
-                }`}
+                className="text-xs font-mono"
                 required
               />
             </div>
 
             <div>
-              <label className={`block font-medium mb-1 uppercase tracking-wider text-[10px] ${subText}`}>Parte / Cliente *</label>
+              <label htmlFor="cliente-processo" className="block font-medium mb-1 uppercase tracking-wider text-[10px] text-muted-foreground">Parte / Cliente *</label>
               <select
+                id="cliente-processo"
                 value={clienteId}
                 onChange={e => setClienteId(Number(e.target.value))}
-                className={`w-full border rounded px-3 py-2 text-xs focus:outline-none ${
-                  isDark ? 'bg-[#090D16] border-slate-800 text-white focus:border-amber-500' : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-slate-800'
-                }`}
+                className="w-full border border-input bg-surface-sunken rounded px-3 py-2 text-xs focus-visible:ring-2 focus-visible:ring-ring focus:outline-none"
                 required
               >
                 <option value="">Selecione o cliente...</option>
@@ -188,15 +167,14 @@ export function ModalFormProcesso({ isOpen, onClose, onSuccess, processoParaEdit
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className={`block font-medium mb-1 uppercase tracking-wider text-[10px] ${subText}`}>Área do Direito</label>
+              <label htmlFor="area-processo" className="block font-medium mb-1 uppercase tracking-wider text-[10px] text-muted-foreground">Área do Direito</label>
               <select
+                id="area-processo"
                 value={area}
                 onChange={e => setArea(e.target.value)}
-                className={`w-full border rounded px-3 py-2 text-xs focus:outline-none ${
-                  isDark ? 'bg-[#090D16] border-slate-800 text-white focus:border-amber-500' : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-slate-800'
-                }`}
+                className="w-full border border-input bg-surface-sunken rounded px-3 py-2 text-xs focus-visible:ring-2 focus-visible:ring-ring focus:outline-none"
               >
                 <option value="Trabalhista">Trabalhista</option>
                 <option value="Cível">Cível</option>
@@ -207,13 +185,12 @@ export function ModalFormProcesso({ isOpen, onClose, onSuccess, processoParaEdit
             </div>
 
             <div>
-              <label className={`block font-medium mb-1 uppercase tracking-wider text-[10px] ${subText}`}>Advogado Responsável</label>
+              <label htmlFor="responsavel-processo" className="block font-medium mb-1 uppercase tracking-wider text-[10px] text-muted-foreground">Advogado Responsável</label>
               <select
+                id="responsavel-processo"
                 value={responsavel}
                 onChange={e => setResponsavel(e.target.value)}
-                className={`w-full border rounded px-3 py-2 text-xs focus:outline-none ${
-                  isDark ? 'bg-[#090D16] border-slate-800 text-white focus:border-amber-500' : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-slate-800'
-                }`}
+                className="w-full border border-input bg-surface-sunken rounded px-3 py-2 text-xs focus-visible:ring-2 focus-visible:ring-ring focus:outline-none"
               >
                 <option value="Dr. Bruno Azevedo">Dr. Bruno Azevedo</option>
                 <option value="Dr. Diego Castro">Dr. Diego Castro</option>
@@ -226,28 +203,26 @@ export function ModalFormProcesso({ isOpen, onClose, onSuccess, processoParaEdit
           </div>
 
           <div>
-            <label className={`block font-medium mb-1 uppercase tracking-wider text-[10px] ${subText}`}>Objeto / Ação *</label>
-            <input
+            <label htmlFor="objeto-processo" className="block font-medium mb-1 uppercase tracking-wider text-[10px] text-muted-foreground">Objeto / Ação *</label>
+            <Input
+              id="objeto-processo"
               type="text"
               placeholder="Ex: Ação Anulatória de Débito Fiscal"
               value={tipo}
               onChange={e => setTipo(e.target.value)}
-              className={`w-full border rounded px-3 py-2 text-xs focus:outline-none ${
-                isDark ? 'bg-[#090D16] border-slate-800 text-white focus:border-amber-500' : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-slate-800'
-              }`}
+              className="text-xs"
               required
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className={`block font-medium mb-1 uppercase tracking-wider text-[10px] ${subText}`}>Fase Inicial</label>
+              <label htmlFor="fase-processo" className="block font-medium mb-1 uppercase tracking-wider text-[10px] text-muted-foreground">Fase Inicial</label>
               <select
+                id="fase-processo"
                 value={etapaAtual}
                 onChange={e => setEtapaAtual(e.target.value)}
-                className={`w-full border rounded px-3 py-2 text-xs focus:outline-none ${
-                  isDark ? 'bg-[#090D16] border-slate-800 text-white focus:border-amber-500' : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-slate-800'
-                }`}
+                className="w-full border border-input bg-surface-sunken rounded px-3 py-2 text-xs focus-visible:ring-2 focus-visible:ring-ring focus:outline-none"
               >
                 {etapas.map(etp => (
                   <option key={etp} value={etp}>{etp}</option>
@@ -256,61 +231,51 @@ export function ModalFormProcesso({ isOpen, onClose, onSuccess, processoParaEdit
             </div>
 
             <div>
-              <label className={`block font-medium mb-1 uppercase tracking-wider text-[10px] ${subText}`}>Valor em Causa (€) *</label>
-              <input
+              <label htmlFor="valor-causa" className="block font-medium mb-1 uppercase tracking-wider text-[10px] text-muted-foreground">Valor em Causa (€) *</label>
+              <Input
+                id="valor-causa"
                 type="number"
                 step="0.01"
                 placeholder="0.00"
                 value={valorCausa}
                 onChange={e => setValorCausa(e.target.value === '' ? '' : Number(e.target.value))}
-                className={`w-full border rounded px-3 py-2 text-xs font-mono focus:outline-none ${
-                  isDark ? 'bg-[#090D16] border-slate-800 text-white focus:border-amber-500' : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-slate-800'
-                }`}
+                className="text-xs font-mono"
                 required
               />
             </div>
           </div>
 
           {/* Slider de Probabilidade */}
-          <div className={`p-3.5 rounded border ${isDark ? 'bg-[#090D16] border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
+          <div className="p-3.5 rounded border border-border bg-surface-sunken">
             <div className="flex justify-between items-center mb-2">
-              <label className={`font-semibold uppercase tracking-wider text-[10px] ${subText}`}>Probabilidade de Êxito</label>
-              <span className="font-mono font-bold text-amber-500 text-xs">
+              <label htmlFor="prob-sucesso" className="font-semibold uppercase tracking-wider text-[10px] text-muted-foreground">Probabilidade de Êxito</label>
+              <span className="font-mono font-bold text-accent-foreground text-xs">
                 {Math.round(probSucesso * 100)}%
               </span>
             </div>
             <input
+              id="prob-sucesso"
               type="range"
               min="0.05"
               max="0.95"
               step="0.05"
               value={probSucesso}
               onChange={e => setProbSucesso(parseFloat(e.target.value))}
-              className="w-full h-1.5 bg-slate-700 rounded appearance-none cursor-pointer accent-amber-500"
+              className="w-full h-1.5 bg-border rounded appearance-none cursor-pointer accent-accent"
             />
           </div>
 
           {/* Ações */}
-          <div className={`pt-3 border-t flex justify-end gap-3 ${isDark ? 'border-slate-800' : 'border-slate-100'}`}>
-            <button
-              type="button"
-              onClick={onClose}
-              className={`px-4 py-2 rounded text-xs font-semibold border ${
-                isDark ? 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-300'
-              }`}
-            >
+          <DialogFooter className="pt-3 border-t border-border">
+            <Button type="button" variant="outline" onClick={onClose} className="text-xs font-semibold">
               Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 hover:border-amber-500/40 text-xs font-semibold rounded uppercase tracking-wider disabled:opacity-50"
-            >
+            </Button>
+            <Button type="submit" disabled={loading} className="text-xs font-semibold uppercase tracking-wider">
               {loading ? 'Gravando...' : (processoParaEditar ? 'Salvar Alterações' : 'Cadastrar Autos')}
-            </button>
-          </div>
+            </Button>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

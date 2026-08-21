@@ -2,6 +2,10 @@ import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { IconScale, IconSun, IconMoon } from './Icons';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 
 export function LoginView() {
   const { login } = useAuth();
@@ -35,70 +39,61 @@ export function LoginView() {
   ];
 
   return (
-    <div className={`min-h-screen w-screen flex flex-col justify-between p-6 sm:p-10 font-sans transition-colors duration-200 ${
-      isDark ? 'bg-[#090D16] text-slate-200' : 'bg-[#F8FAFC] text-slate-800'
-    }`}>
-      
+    <div className="min-h-screen w-screen flex flex-col justify-between p-6 sm:p-10 font-sans bg-background text-foreground transition-colors duration-200">
+
       {/* Top Header com Seletor de Tema */}
       <header className="flex justify-between items-center max-w-5xl w-full mx-auto">
         <div className="flex items-center gap-3">
-          <div className={`w-8 h-8 rounded-lg flex items-center justify-center border shadow-sm ${
-            isDark ? 'bg-[#151D33] border-amber-500/30 text-amber-400' : 'bg-slate-900 border-slate-800 text-amber-400'
-          }`}>
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center border border-accent/30 bg-surface text-accent-foreground shadow-sm">
             <IconScale className="w-4 h-4" />
           </div>
           <div>
-            <span className={`font-serif text-sm tracking-wider font-semibold uppercase ${isDark ? 'text-white' : 'text-slate-900'}`}>
+            <span className="font-serif text-sm tracking-wider font-semibold uppercase">
               LexData SaaS
             </span>
-            <span className="text-[10px] font-mono text-amber-500/90 uppercase tracking-widest block font-medium">
+            <span className="text-[10px] font-mono uppercase tracking-widest block font-medium text-accent-foreground/90">
               Legal Intelligence
             </span>
           </div>
         </div>
 
-        <button
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
           onClick={toggleTheme}
-          className={`flex items-center gap-2 py-1.5 px-3 rounded-md text-xs font-medium border transition-colors ${
-            isDark
-              ? 'bg-[#0E1424] border-slate-800 hover:bg-slate-800 text-slate-300'
-              : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-700 shadow-sm'
-          }`}
-          title="Alternar Tema Claro/Escuro"
+          aria-label={isDark ? 'Alternar para modo claro' : 'Alternar para modo escuro'}
+          className="gap-2 text-xs"
         >
-          {isDark ? <IconSun className="w-3.5 h-3.5 text-amber-400" /> : <IconMoon className="w-3.5 h-3.5 text-slate-600" />}
+          {isDark ? <IconSun className="w-3.5 h-3.5 text-accent" /> : <IconMoon className="w-3.5 h-3.5" />}
           <span>{isDark ? 'Modo Claro' : 'Modo Escuro'}</span>
-        </button>
+        </Button>
       </header>
 
       {/* Card Central de Autenticação */}
       <main className="flex items-center justify-center my-6">
-        <div className={`max-w-2xl w-full rounded-xl border p-8 sm:p-10 shadow-2xl transition-colors duration-200 ${
-          isDark ? 'bg-[#0E1424] border-slate-800/90' : 'bg-white border-slate-200 shadow-slate-200/50'
-        }`}>
-          
+        <Card className="max-w-2xl w-full p-8 sm:p-10 shadow-2xl">
+
           {/* Cabeçalho do Card */}
-          <div className={`border-b pb-6 mb-6 ${isDark ? 'border-slate-800/80' : 'border-slate-100'}`}>
+          <div className="border-b border-border pb-6 mb-6">
             <div className="flex justify-between items-start">
               <div>
-                <h1 className={`text-xl font-serif font-bold uppercase tracking-wider ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                <h1 className="text-xl font-serif font-bold uppercase tracking-wider">
                   Terminal de Acesso Seguro
                 </h1>
-                <p className="text-xs text-slate-400 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   Controladoria Jurídica, Pipeline e Governança de Dados Relacionais
                 </p>
               </div>
-              <span className={`text-[10px] font-mono uppercase tracking-widest px-2.5 py-1 rounded border font-medium ${
-                isDark ? 'bg-slate-900 border-slate-800 text-amber-400/90' : 'bg-slate-50 border-slate-200 text-slate-700'
-              }`}>
+              <Badge variant="outline" className="text-[10px] font-mono uppercase tracking-widest">
                 RBAC v2.4
-              </span>
+              </Badge>
             </div>
           </div>
 
           {/* Alerta de Erro */}
           {erro && (
-            <div className="p-3.5 mb-5 bg-red-950/40 border border-red-900/60 rounded-md text-red-300 text-xs flex items-center justify-between">
+            <div role="alert" className="p-3.5 mb-5 bg-red-950/40 border border-red-900/60 rounded-md text-red-300 text-xs flex items-center justify-between">
               <span>Credenciais não reconhecidas. Por favor, verifique os dados informados.</span>
               <span className="text-[10px] font-mono text-red-400">[AUTH_401]</span>
             </div>
@@ -107,106 +102,84 @@ export function LoginView() {
           {/* Formulário de Login */}
           <form onSubmit={handleSubmit} className="space-y-4 text-xs">
             <div>
-              <label className="block text-slate-400 font-medium mb-1.5 uppercase tracking-wider text-[10px]">
+              <label htmlFor="email" className="block text-muted-foreground font-medium mb-1.5 uppercase tracking-wider text-[10px]">
                 E-mail Institucional
               </label>
-              <input
+              <Input
+                id="email"
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 placeholder="nome@lexdata.com"
-                className={`w-full border rounded-md px-3.5 py-2.5 font-mono text-xs focus:outline-none transition-colors ${
-                  isDark
-                    ? 'bg-[#090D16] border-slate-800 text-white focus:border-amber-500/80 placeholder:text-slate-600'
-                    : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-slate-800 placeholder:text-slate-400'
-                }`}
+                className="font-mono text-xs h-11"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-slate-400 font-medium mb-1.5 uppercase tracking-wider text-[10px]">
+              <label htmlFor="senha" className="block text-muted-foreground font-medium mb-1.5 uppercase tracking-wider text-[10px]">
                 Chave de Acesso / Senha
               </label>
-              <input
+              <Input
+                id="senha"
                 type="password"
                 value={senha}
                 onChange={e => setSenha(e.target.value)}
                 placeholder="••••••••"
-                className={`w-full border rounded-md px-3.5 py-2.5 font-mono text-xs focus:outline-none transition-colors ${
-                  isDark
-                    ? 'bg-[#090D16] border-slate-800 text-white focus:border-amber-500/80 placeholder:text-slate-600'
-                    : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-slate-800 placeholder:text-slate-400'
-                }`}
+                className="font-mono text-xs h-11"
                 required
               />
             </div>
 
-            <button
-              type="submit"
-              className={`w-full py-2.5 font-semibold rounded-md border transition-all text-xs uppercase tracking-wider shadow-sm ${
-                isDark
-                  ? 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-white hover:border-amber-500/40'
-                  : 'bg-slate-900 hover:bg-slate-800 border-slate-900 text-white'
-              }`}
-            >
+            <Button type="submit" className="w-full h-11 uppercase tracking-wider text-xs font-semibold">
               Autenticar e Acessar Painel
-            </button>
+            </Button>
           </form>
 
           {/* Sessão Rápida para Avaliação da Banca / Apresentação do TCC */}
-          <div className={`mt-8 pt-6 border-t space-y-3.5 ${isDark ? 'border-slate-800/80' : 'border-slate-100'}`}>
-            <div className="flex justify-between items-center text-[10px] uppercase font-mono text-slate-400 tracking-wider">
+          <div className="mt-8 pt-6 border-t border-border space-y-3.5">
+            <div className="flex justify-between items-center text-[10px] uppercase font-mono text-muted-foreground tracking-wider">
               <span>Sessão de Demonstração (Atalhos por Perfil)</span>
               <span>PostgreSQL Sync</span>
             </div>
 
             {/* Acesso Diretoria */}
             <button
+              type="button"
               onClick={() => preencherAcessoRapido('admin@lexdata.com', 'admin')}
-              className={`w-full p-3.5 rounded-lg border text-left transition-all flex items-center justify-between group ${
-                isDark
-                  ? 'bg-[#151D33]/60 hover:bg-[#18223B] border-amber-500/30 hover:border-amber-500/60'
-                  : 'bg-amber-50/50 hover:bg-amber-100/60 border-amber-200'
-              }`}
+              className="w-full min-h-11 p-3.5 rounded-lg border border-accent/30 bg-accent/5 hover:bg-accent/10 hover:border-accent/60 text-left transition-all flex items-center justify-between group focus-visible:ring-2 focus-visible:ring-accent"
             >
               <div>
-                <div className={`font-serif text-xs font-bold uppercase tracking-wider ${isDark ? 'text-amber-300' : 'text-amber-900'}`}>
+                <div className="font-serif text-xs font-bold uppercase tracking-wider text-accent-foreground">
                   Conselho Diretivo — Visão Consolidada 360°
                 </div>
-                <div className="text-[11px] text-slate-400 font-mono mt-0.5">
+                <div className="text-[11px] text-muted-foreground font-mono mt-0.5">
                   admin@lexdata.com • Acesso irrestrito a todos os dados e advogados
                 </div>
               </div>
-              <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${
-                isDark ? 'bg-amber-500/20 border-amber-500/40 text-amber-300' : 'bg-amber-200 border-amber-300 text-amber-900'
-              }`}>
+              <Badge className="text-[10px] font-mono font-bold bg-accent/20 border-accent/40 text-accent-foreground">
                 DIRETORIA
-              </span>
+              </Badge>
             </button>
 
             {/* Grid dos Advogados Cadastrados no Banco */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 pt-1">
               {advogadosCorpo.map(adv => (
                 <button
+                  type="button"
                   key={adv.email}
                   onClick={() => preencherAcessoRapido(adv.email, '123')}
-                  className={`p-2.5 rounded-md border text-left transition-all flex items-center gap-2.5 group ${
-                    isDark
-                      ? 'bg-[#090D16] hover:bg-slate-800/80 border-slate-800 hover:border-slate-700'
-                      : 'bg-slate-50 hover:bg-slate-100 border-slate-200 hover:border-slate-300'
-                  }`}
+                  aria-label={`Entrar como ${adv.nome}`}
+                  className="min-h-11 p-2.5 rounded-md border border-border bg-surface-sunken hover:bg-border/40 text-left transition-all flex items-center gap-2.5 group focus-visible:ring-2 focus-visible:ring-accent"
                 >
-                  <span className={`w-6 h-6 rounded flex items-center justify-center text-[10px] font-mono font-bold border flex-shrink-0 ${
-                    isDark ? 'bg-slate-800 border-slate-700 text-amber-400' : 'bg-white border-slate-300 text-slate-800'
-                  }`}>
+                  <span className="w-6 h-6 rounded flex items-center justify-center text-[10px] font-mono font-bold border border-border bg-surface text-accent-foreground flex-shrink-0">
                     {adv.init}
                   </span>
                   <div className="min-w-0 flex-1">
-                    <div className={`text-[11px] font-medium truncate ${isDark ? 'text-slate-200 group-hover:text-white' : 'text-slate-800 group-hover:text-slate-900'}`}>
+                    <div className="text-[11px] font-medium truncate group-hover:text-foreground">
                       {adv.nome}
                     </div>
-                    <div className="text-[9px] font-mono text-slate-400 truncate">
+                    <div className="text-[9px] font-mono text-muted-foreground truncate">
                       {adv.cargo}
                     </div>
                   </div>
@@ -214,12 +187,12 @@ export function LoginView() {
               ))}
             </div>
           </div>
-        </div>
+        </Card>
       </main>
 
       {/* Rodapé Corporativo */}
-      <footer className="text-center text-[11px] font-mono text-slate-400 max-w-5xl w-full mx-auto">
-        LexData Intelligence &copy; {new Date().getFullYear()} — Controladoria de Dados Relacionais & Governança Jurídica
+      <footer className="text-center text-[11px] font-mono text-muted-foreground max-w-5xl w-full mx-auto">
+        LexData Intelligence &copy; {new Date().getFullYear()} — Controladoria de Dados Relacionais &amp; Governança Jurídica
       </footer>
     </div>
   );

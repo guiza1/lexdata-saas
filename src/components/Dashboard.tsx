@@ -3,21 +3,15 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  LineChart,
-  Line,
-  Legend
+  PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar,
+  XAxis, YAxis, CartesianGrid, LineChart, Line, Legend
 } from 'recharts';
 import { IconScale, IconTrendingUp } from './Icons';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import type { LucideIcon } from 'lucide-react';
+import type { ComponentType, SVGProps, ReactNode } from 'react';
 
 interface Processo {
   processo_id: number;
@@ -49,6 +43,43 @@ interface Fatura {
 }
 
 const PALETA_NOBRE = ['#2563EB', '#D97706', '#059669', '#7C3AED', '#DC2626', '#475569'];
+
+function KpiCard({ label, icon: Icon, iconTone = 'default', value, valueTone = 'default', footnote, badge }: {
+  label: string;
+  icon: ComponentType<SVGProps<SVGSVGElement>> | LucideIcon;
+  iconTone?: 'default' | 'accent';
+  value: ReactNode;
+  valueTone?: 'default' | 'accent' | 'success';
+  footnote: string;
+  badge?: { text: string; active: boolean };
+}) {
+  const valueClass = {
+    default: 'text-foreground',
+    accent: 'text-accent-foreground',
+    success: 'text-emerald-500',
+  }[valueTone];
+
+  return (
+    <Card className="p-5 justify-between">
+      <div className="flex justify-between items-start">
+        <span className="text-[11px] uppercase font-mono tracking-wider font-semibold text-muted-foreground">{label}</span>
+        {badge ? (
+          <Badge variant={badge.active ? 'default' : 'secondary'} className="text-[10px] font-mono font-bold">
+            {badge.text}
+          </Badge>
+        ) : (
+          <div className={`p-1.5 rounded border ${iconTone === 'accent' ? 'bg-accent/20 border-accent/40 text-accent-foreground' : 'bg-surface-sunken border-border text-muted-foreground'}`}>
+            <Icon className="w-3.5 h-3.5" />
+          </div>
+        )}
+      </div>
+      <div className="my-2">
+        <span className={`text-2xl font-mono tabular-nums font-bold ${valueClass}`}>{value}</span>
+      </div>
+      <p className="text-[10px] pt-2 border-t border-border font-mono text-muted-foreground">{footnote}</p>
+    </Card>
+  );
+}
 
 export function Dashboard() {
   const { usuario } = useAuth();
@@ -87,7 +118,6 @@ export function Dashboard() {
   const formatarMoeda = (val?: number | null) =>
     new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' }).format(val || 0);
 
-  // Isolamento RBAC
   const processosDoUsuario = processosOriginais.filter(p => {
     if (usuario?.perfil === 'advogado' && usuario.advogadoResponsavel) {
       return (p.responsavel || '').trim().toLowerCase() === usuario.advogadoResponsavel.trim().toLowerCase();
@@ -103,7 +133,6 @@ export function Dashboard() {
     return true;
   });
 
-  // Anos disponíveis
   const anosDisponiveis = Array.from(
     new Set(
       [
@@ -122,7 +151,6 @@ export function Dashboard() {
   const processosFiltrados = processosDoUsuario.filter(p => filtrarPorAno(p.data_abertura));
   const faturasFiltradas = faturasDoUsuario.filter(f => filtrarPorAno(f.data_emissao || f.data_vencimento));
 
-  // KPIs
   const processosAtivos = processosFiltrados.filter(
     p => (p.etapa_atual || '').toLowerCase() !== 'arquivado'
   );
@@ -134,7 +162,7 @@ export function Dashboard() {
   );
 
   const totalFaturado = faturasFiltradas.reduce((acc, f) => acc + (Number(f.valor) || 0), 0);
-  
+
   let totalRecebido = 0;
   faturasFiltradas.forEach(f => {
     if (f.pagamentos && Array.isArray(f.pagamentos)) {
@@ -145,7 +173,6 @@ export function Dashboard() {
   });
   const honorariosPendentes = Math.max(0, totalFaturado - totalRecebido);
 
-  // Agrupamento por Área
   const contagemAreas: Record<string, { processos: number; valor: number }> = {};
   processosFiltrados.forEach(p => {
     const area = p.area || 'Outros';
@@ -163,13 +190,11 @@ export function Dashboard() {
     valor: val.valor
   }));
 
-  // Série Mensal Financeira: Faturamento Emitido vs. Receita Liquidada
   const mesesNomes = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-  
+
   const dadosMensais = mesesNomes.map((mesNome, index) => {
     const mesNum = index + 1;
 
-    // 1. Total faturado/emitido no mês
     const faturasNoMes = faturasDoUsuario.filter(f => {
       const dataStr = f.data_emissao || f.data_vencimento;
       if (!dataStr) return false;
@@ -181,7 +206,6 @@ export function Dashboard() {
 
     const faturadoMes = faturasNoMes.reduce((acc, f) => acc + (Number(f.valor) || 0), 0);
 
-    // 2. Total recebido/pago no mês
     let recebidoMes = 0;
     faturasDoUsuario.forEach(f => {
       if (f.pagamentos && Array.isArray(f.pagamentos)) {
@@ -207,174 +231,110 @@ export function Dashboard() {
   });
 
   if (loading) {
-    return <div className="p-8 text-slate-400 font-mono text-xs">Carregando métricas consolidadas...</div>;
+    return <div className="p-8 text-muted-foreground font-mono text-xs">Carregando métricas consolidadas...</div>;
   }
 
-  const cardBg = isDark ? 'bg-[#0E1424] border-slate-800' : 'bg-white border-slate-200 shadow-sm';
-  const subText = isDark ? 'text-slate-400' : 'text-slate-500';
-  const mainTitle = isDark ? 'text-slate-100' : 'text-slate-900';
+  const gridStroke = isDark ? '#1E293B' : '#E2E8F0';
+  const axisStroke = isDark ? '#64748B' : '#94A3B8';
+  const tooltipStyle = {
+    backgroundColor: isDark ? '#0E1424' : '#FFFFFF',
+    borderColor: isDark ? '#1E293B' : '#E2E8F0',
+    borderRadius: '6px',
+    color: isDark ? '#FFFFFF' : '#0F172A'
+  };
 
   return (
     <div className="space-y-6">
-      
+
       {/* Barra de Filtro de Exercício */}
-      <div className={`p-4 rounded-lg border flex flex-wrap justify-between items-center gap-4 transition-colors duration-200 ${cardBg}`}>
+      <Card className="p-4 flex flex-wrap justify-between items-center gap-4">
         <div>
-          <h3 className={`text-xs font-semibold uppercase tracking-wider ${mainTitle}`}>
-            Recorte de Exercício Financeiro & Processual
+          <h3 className="text-xs font-semibold uppercase tracking-wider">
+            Recorte de Exercício Financeiro &amp; Processual
           </h3>
-          <p className={`text-[11px] ${subText}`}>Métricas sincronizadas com a base relacional</p>
+          <p className="text-[11px] text-muted-foreground">Métricas sincronizadas com a base relacional</p>
         </div>
 
         <div className="flex items-center gap-3">
-          <label className={`text-xs font-medium ${subText}`}>Exercício Fiscal:</label>
-          <select
-            value={anoSelecionado}
-            onChange={e => setAnoSelecionado(e.target.value)}
-            className={`border text-xs font-semibold rounded-md px-3 py-1.5 focus:outline-none transition-colors ${
-              isDark
-                ? 'bg-[#090D16] border-slate-700 text-white focus:border-amber-500'
-                : 'bg-slate-50 border-slate-300 text-slate-800 focus:border-slate-800'
-            }`}
-          >
-            <option value="todos">Todos os Exercícios (Consolidado)</option>
-            {anosDisponiveis.map(ano => (
-              <option key={ano} value={ano}>
-                Ano {ano}
-              </option>
-            ))}
-          </select>
+          <label htmlFor="ano-fiscal" className="text-xs font-medium text-muted-foreground">Exercício Fiscal:</label>
+          <Select value={anoSelecionado} onValueChange={setAnoSelecionado}>
+            <SelectTrigger id="ano-fiscal" className="w-56 text-xs font-semibold">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todos os Exercícios (Consolidado)</SelectItem>
+              {anosDisponiveis.map(ano => (
+                <SelectItem key={ano} value={ano}>Ano {ano}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-      </div>
+      </Card>
 
       {/* Grid Principal dos 4 KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* KPI 1 */}
-        <div className={`p-5 rounded-lg border flex flex-col justify-between transition-colors duration-200 ${cardBg}`}>
-          <div className="flex justify-between items-start">
-            <span className={`text-[11px] uppercase font-mono tracking-wider font-semibold ${subText}`}>Processos Ativos</span>
-            <div className={`p-1.5 rounded border ${isDark ? 'bg-slate-800/80 border-slate-700 text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-700'}`}>
-              <IconScale className="w-3.5 h-3.5" />
-            </div>
-          </div>
-          <div className="my-2">
-            <div className="flex items-baseline gap-2">
-              <span className={`text-3xl font-bold font-mono tabular-nums ${mainTitle}`}>{processosAtivos.length}</span>
-              <span className={`text-xs font-mono ${subText}`}>/ {totalProcessosGeral} totais</span>
-            </div>
-          </div>
-          <p className={`text-[10px] pt-2 border-t font-mono ${isDark ? 'border-slate-800 text-slate-400' : 'border-slate-100 text-slate-500'}`}>
-            Em andamento no tribunal
-          </p>
-        </div>
-
-        {/* KPI 2 */}
-        <div className={`p-5 rounded-lg border flex flex-col justify-between transition-colors duration-200 ${cardBg}`}>
-          <div className="flex justify-between items-start">
-            <span className={`text-[11px] uppercase font-mono tracking-wider font-semibold ${subText}`}>Pipeline Ponderado</span>
-            <div className={`p-1.5 rounded border ${isDark ? 'bg-amber-500/10 border-amber-500/30 text-amber-400' : 'bg-amber-50 border-amber-200 text-amber-700'}`}>
-              <IconTrendingUp className="w-3.5 h-3.5" />
-            </div>
-          </div>
-          <div className="my-2">
-            <span className="text-2xl font-mono tabular-nums font-bold text-amber-500">
-              {formatarMoeda(pipelinePonderado)}
-            </span>
-          </div>
-          <p className={`text-[10px] pt-2 border-t font-mono ${isDark ? 'border-slate-800 text-slate-400' : 'border-slate-100 text-slate-500'}`}>
-            Valor Causa × Prob. Êxito
-          </p>
-        </div>
-
-        {/* KPI 3 */}
-        <div className={`p-5 rounded-lg border flex flex-col justify-between transition-colors duration-200 ${cardBg}`}>
-          <div className="flex justify-between items-start">
-            <span className={`text-[11px] uppercase font-mono tracking-wider font-semibold ${subText}`}>Honorários Liquidados</span>
-            <span className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded border ${
-              isDark ? 'bg-emerald-950/40 border-emerald-800/60 text-emerald-400' : 'bg-emerald-50 border-emerald-200 text-emerald-700'
-            }`}>
-              RECEBIDO
-            </span>
-          </div>
-          <div className="my-2">
-            <span className={`text-2xl font-mono tabular-nums font-bold ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`}>
-              {formatarMoeda(totalRecebido)}
-            </span>
-          </div>
-          <p className={`text-[10px] pt-2 border-t font-mono ${isDark ? 'border-slate-800 text-slate-400' : 'border-slate-100 text-slate-500'}`}>
-            Faturas liquidadas no período
-          </p>
-        </div>
-
-        {/* KPI 4 */}
-        <div className={`p-5 rounded-lg border flex flex-col justify-between transition-colors duration-200 ${cardBg}`}>
-          <div className="flex justify-between items-start">
-            <span className={`text-[11px] uppercase font-mono tracking-wider font-semibold ${subText}`}>Saldo Pendente</span>
-            <span className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded border ${
-              honorariosPendentes > 0
-                ? isDark ? 'bg-amber-950/40 border-amber-800/60 text-amber-400' : 'bg-amber-50 border-amber-200 text-amber-700'
-                : isDark ? 'bg-slate-800 border-slate-700 text-slate-400' : 'bg-slate-100 border-slate-200 text-slate-600'
-            }`}>
-              A QUITAR
-            </span>
-          </div>
-          <div className="my-2">
-            <span className={`text-2xl font-mono tabular-nums font-bold ${
-              honorariosPendentes > 0 ? 'text-amber-500' : (isDark ? 'text-slate-300' : 'text-slate-700')
-            }`}>
-              {formatarMoeda(honorariosPendentes)}
-            </span>
-          </div>
-          <p className={`text-[10px] pt-2 border-t font-mono ${isDark ? 'border-slate-800 text-slate-400' : 'border-slate-100 text-slate-500'}`}>
-            Aguardando pagamento
-          </p>
-        </div>
+        <KpiCard
+          label="Processos Ativos"
+          icon={IconScale}
+          value={<span className="flex items-baseline gap-2">{processosAtivos.length}<span className="text-xs font-mono text-muted-foreground">/ {totalProcessosGeral} totais</span></span>}
+          footnote="Em andamento no tribunal"
+        />
+        <KpiCard
+          label="Pipeline Ponderado"
+          icon={IconTrendingUp}
+          iconTone="accent"
+          value={formatarMoeda(pipelinePonderado)}
+          valueTone="accent"
+          footnote="Valor Causa × Prob. Êxito"
+        />
+        <KpiCard
+          label="Honorários Liquidados"
+          icon={IconScale}
+          badge={{ text: 'RECEBIDO', active: true }}
+          value={formatarMoeda(totalRecebido)}
+          valueTone="success"
+          footnote="Faturas liquidadas no período"
+        />
+        <KpiCard
+          label="Saldo Pendente"
+          icon={IconScale}
+          badge={{ text: 'A QUITAR', active: honorariosPendentes > 0 }}
+          value={formatarMoeda(honorariosPendentes)}
+          valueTone={honorariosPendentes > 0 ? 'accent' : 'default'}
+          footnote="Aguardando pagamento"
+        />
       </div>
 
       {/* Gráficos de Estrutura */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        
-        {/* Gráfico 1: Barras por Área */}
-        <div className={`p-6 rounded-lg border transition-colors duration-200 ${cardBg}`}>
+
+        <Card className="p-6">
           <div className="flex justify-between items-center mb-3">
-            <h3 className={`text-xs font-semibold uppercase tracking-wider ${mainTitle}`}>
+            <h3 className="text-xs font-semibold uppercase tracking-wider">
               Volume de Demandas por Área Jurídica
             </h3>
-            <span className={`text-[11px] font-mono ${subText}`}>Qtd. Processos</span>
+            <span className="text-[11px] font-mono text-muted-foreground">Qtd. Processos</span>
           </div>
 
           <div style={{ width: '100%', height: 280 }}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={dadosGraficoArea}
-                layout="vertical"
-                margin={{ top: 10, right: 30, left: 20, bottom: 10 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#1E293B' : '#E2E8F0'} horizontal={false} />
-                <XAxis type="number" stroke={isDark ? '#64748B' : '#94A3B8'} tick={{ fontSize: 11 }} />
-                <YAxis dataKey="area" type="category" stroke={isDark ? '#64748B' : '#94A3B8'} tick={{ fontSize: 11 }} width={90} />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: isDark ? '#090D16' : '#FFFFFF',
-                    borderColor: isDark ? '#1E293B' : '#E2E8F0',
-                    borderRadius: '6px',
-                    color: isDark ? '#FFFFFF' : '#0F172A'
-                  }}
-                  formatter={(val: any) => [`${val || 0} processos`, 'Volume']}
-                />
+              <BarChart data={dadosGraficoArea} layout="vertical" margin={{ top: 10, right: 30, left: 20, bottom: 10 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} horizontal={false} />
+                <XAxis type="number" stroke={axisStroke} tick={{ fontSize: 11 }} />
+                <YAxis dataKey="area" type="category" stroke={axisStroke} tick={{ fontSize: 11 }} width={90} />
+                <Tooltip contentStyle={tooltipStyle} formatter={(val: any) => [`${val || 0} processos`, 'Volume']} />
                 <Bar dataKey="processos" fill="#2563EB" radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
-        </div>
+        </Card>
 
-        {/* Gráfico 2: Donut Distribuição */}
-        <div className={`p-6 rounded-lg border transition-colors duration-200 ${cardBg}`}>
+        <Card className="p-6">
           <div className="flex justify-between items-center mb-3">
-            <h3 className={`text-xs font-semibold uppercase tracking-wider ${mainTitle}`}>
+            <h3 className="text-xs font-semibold uppercase tracking-wider">
               Distribuição Financeira do Valor em Causa
             </h3>
-            <span className={`text-[11px] font-mono ${subText}`}>Montante (€)</span>
+            <span className="text-[11px] font-mono text-muted-foreground">Montante (€)</span>
           </div>
 
           <div style={{ width: '100%', height: 280 }}>
@@ -395,38 +355,30 @@ export function Dashboard() {
                     <Cell key={`cell-${index}`} fill={PALETA_NOBRE[index % PALETA_NOBRE.length]} />
                   ))}
                 </Pie>
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: isDark ? '#090D16' : '#FFFFFF',
-                    borderColor: isDark ? '#1E293B' : '#E2E8F0',
-                    borderRadius: '6px',
-                    color: isDark ? '#FFFFFF' : '#0F172A'
-                  }}
-                  formatter={(val: any) => [formatarMoeda(val), 'Volume (€)']}
-                />
+                <Tooltip contentStyle={tooltipStyle} formatter={(val: any) => [formatarMoeda(val), 'Volume (€)']} />
               </PieChart>
             </ResponsiveContainer>
           </div>
-        </div>
+        </Card>
       </div>
 
-      {/* Gráfico 3: Fluxo Financeiro Mensal (Faturado vs. Recebido) */}
-      <div className={`p-6 rounded-lg border transition-colors duration-200 ${cardBg}`}>
+      {/* Gráfico 3: Fluxo Financeiro Mensal */}
+      <Card className="p-6">
         <div className="flex flex-wrap justify-between items-center gap-2 mb-4">
           <div>
-            <h3 className={`text-xs font-semibold uppercase tracking-wider ${mainTitle}`}>
+            <h3 className="text-xs font-semibold uppercase tracking-wider">
               Fluxo Financeiro Mensal: Faturamento Emitido vs. Receita Liquidada
             </h3>
-            <p className={`text-[11px] ${subText}`}>
+            <p className="text-[11px] text-muted-foreground">
               Comparação entre honorários emitidos (Competência) e honorários recebidos (Caixa) ao longo do ano
             </p>
           </div>
           <div className="flex items-center gap-3 text-xs font-mono">
             <span className="flex items-center gap-1.5 text-blue-500">
-              <span className="w-2.5 h-2.5 rounded-full bg-blue-600"></span> Faturado (Emitido)
+              <span className="w-2.5 h-2.5 rounded-full bg-blue-600" /> Faturado (Emitido)
             </span>
             <span className="flex items-center gap-1.5 text-emerald-500">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Recebido (Liquidado)
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> Recebido (Liquidado)
             </span>
           </div>
         </div>
@@ -434,16 +386,11 @@ export function Dashboard() {
         <div style={{ width: '100%', height: 270 }}>
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={dadosMensais} margin={{ top: 10, right: 20, left: 10, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#1E293B' : '#E2E8F0'} />
-              <XAxis dataKey="mes" stroke={isDark ? '#64748B' : '#94A3B8'} tick={{ fontSize: 11 }} />
-              <YAxis stroke={isDark ? '#64748B' : '#94A3B8'} tick={{ fontSize: 11 }} />
+              <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} />
+              <XAxis dataKey="mes" stroke={axisStroke} tick={{ fontSize: 11 }} />
+              <YAxis stroke={axisStroke} tick={{ fontSize: 11 }} />
               <Tooltip
-                contentStyle={{
-                  backgroundColor: isDark ? '#090D16' : '#FFFFFF',
-                  borderColor: isDark ? '#1E293B' : '#E2E8F0',
-                  borderRadius: '6px',
-                  color: isDark ? '#FFFFFF' : '#0F172A'
-                }}
+                contentStyle={tooltipStyle}
                 formatter={(val: any, name: any) => {
                   const nomeStr = String(name || '');
                   const rotulo = nomeStr.includes('Recebidos') || nomeStr === 'recebido'
@@ -453,29 +400,12 @@ export function Dashboard() {
                 }}
               />
               <Legend verticalAlign="bottom" height={36} wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} />
-              <Line
-                type="monotone"
-                dataKey="faturado"
-                name="Honorários Faturados (€)"
-                stroke="#2563EB"
-                strokeWidth={2.5}
-                dot={{ r: 3.5 }}
-                activeDot={{ r: 6 }}
-              />
-              <Line
-                type="monotone"
-                dataKey="recebido"
-                name="Honorários Recebidos (€)"
-                stroke="#10B981"
-                strokeWidth={2.5}
-                strokeDasharray="3 3"
-                dot={{ r: 3.5 }}
-                activeDot={{ r: 6 }}
-              />
+              <Line type="monotone" dataKey="faturado" name="Honorários Faturados (€)" stroke="#2563EB" strokeWidth={2.5} dot={{ r: 3.5 }} activeDot={{ r: 6 }} />
+              <Line type="monotone" dataKey="recebido" name="Honorários Recebidos (€)" stroke="#10B981" strokeWidth={2.5} strokeDasharray="3 3" dot={{ r: 3.5 }} activeDot={{ r: 6 }} />
             </LineChart>
           </ResponsiveContainer>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }
