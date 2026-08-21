@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useTheme } from '../contexts/ThemeContext';
 import { ModalDetalhesCliente } from './ModalDetalhesCliente';
-// import { IconUsers, IconScale } from './Icons';
 
 interface ClienteComMetricas {
   cliente_id: number;
@@ -53,7 +52,7 @@ export function ClientesView() {
       ]);
 
       const processosPorCliente: Record<number, { count: number; valor: number }> = {};
-      dataProcessos?.forEach(p => {
+      dataProcessos?.forEach((p: any) => {
         if (!processosPorCliente[p.cliente_id]) {
           processosPorCliente[p.cliente_id] = { count: 0, valor: 0 };
         }
@@ -62,11 +61,11 @@ export function ClientesView() {
       });
 
       const faturasPorCliente: Record<number, number> = {};
-      dataFaturas?.forEach(f => {
+      dataFaturas?.forEach((f: any) => {
         faturasPorCliente[f.cliente_id] = (faturasPorCliente[f.cliente_id] || 0) + (Number(f.valor) || 0);
       });
 
-      const consolidados: ClienteComMetricas[] = (dataClientes || []).map(c => ({
+      const consolidados: ClienteComMetricas[] = (dataClientes || []).map((c: any) => ({
         cliente_id: c.cliente_id,
         nome: c.nome,
         cidade: c.cidade || 'N/D',
@@ -219,7 +218,7 @@ export function ClientesView() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
           <div className={`border rounded-lg max-w-md w-full shadow-2xl overflow-hidden animate-in fade-in duration-150 ${cardBg}`}>
             <div className={`p-5 border-b flex justify-between items-center ${isDark ? 'bg-[#090D16]/90 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
-              <h3 className={`text-sm font-serif font-bold uppercase tracking-wider ${mainTitle}`}>
+              <h3 className={`text-sm font-bold uppercase tracking-wider ${mainTitle}`}>
                 {clienteParaEditar ? `Editar Cadastro #${clienteParaEditar.cliente_id}` : 'Novo Registro Cadastral'}
               </h3>
               <button
@@ -442,7 +441,7 @@ export function ClientesView() {
                     </button>
                   </div>
 
-                  <h4 className={`text-sm font-serif font-bold uppercase tracking-wider mb-1 line-clamp-1 group-hover:text-amber-500 transition-colors ${mainTitle}`}>
+                  <h4 className={`text-sm font-bold uppercase tracking-wider mb-1 line-clamp-1 group-hover:text-amber-500 transition-colors ${mainTitle}`}>
                     {c.nome}
                   </h4>
                   <p className={`text-xs font-mono mb-4 ${subText}`}>{c.segmento}</p>
@@ -451,11 +450,11 @@ export function ClientesView() {
                 <div className={`grid grid-cols-2 gap-2 pt-3 border-t text-xs ${isDark ? 'border-slate-800/80' : 'border-slate-100'}`}>
                   <div>
                     <span className={`block text-[10px] uppercase font-mono ${subText}`}>Processos</span>
-                    <span className={`font-serif font-bold ${mainTitle}`}>{c.totalProcessos} causas</span>
+                    <span className={`font-bold ${mainTitle}`}>{c.totalProcessos} causas</span>
                   </div>
                   <div>
                     <span className={`block text-[10px] uppercase font-mono ${subText}`}>Volume em Causa</span>
-                    <span className="font-mono font-bold text-amber-500">{formatarMoeda(c.valorTotalCarteira)}</span>
+                    <span className="font-mono font-bold text-amber-500 tabular-nums">{formatarMoeda(c.valorTotalCarteira)}</span>
                   </div>
                 </div>
 
@@ -492,7 +491,7 @@ export function ClientesView() {
                     className={`transition-colors cursor-pointer ${isDark ? 'hover:bg-slate-800/40' : 'hover:bg-slate-50'}`}
                   >
                     <td className="p-3.5 font-mono text-amber-500 font-bold">#{c.cliente_id}</td>
-                    <td className={`p-3.5 font-serif font-bold uppercase tracking-wider ${mainTitle}`}>{c.nome}</td>
+                    <td className={`p-3.5 font-bold uppercase tracking-wider ${mainTitle}`}>{c.nome}</td>
                     <td className={`p-3.5 font-mono ${subText}`}>{c.cidade} • {c.uf}</td>
                     <td className="p-3.5">
                       <span className={`px-2 py-0.5 rounded text-[10px] font-mono border ${
@@ -501,13 +500,13 @@ export function ClientesView() {
                         {c.segmento}
                       </span>
                     </td>
-                    <td className={`p-3.5 text-center font-bold font-mono ${mainTitle}`}>
+                    <td className={`p-3.5 text-center font-bold font-mono tabular-nums ${mainTitle}`}>
                       {c.totalProcessos}
                     </td>
-                    <td className="p-3.5 text-right font-mono font-bold text-amber-500">
+                    <td className="p-3.5 text-right font-mono font-bold text-amber-500 tabular-nums">
                       {formatarMoeda(c.valorTotalCarteira)}
                     </td>
-                    <td className={`p-3.5 text-right font-mono ${mainTitle}`}>
+                    <td className={`p-3.5 text-right font-mono tabular-nums ${mainTitle}`}>
                       {formatarMoeda(c.totalFaturado)}
                     </td>
                     <td className="p-3.5 text-center">

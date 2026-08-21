@@ -30,14 +30,14 @@ export function ModalDetalhesCliente({ clienteId, onClose }: ModalDetalhesClient
           supabase.from('faturas').select('*, pagamentos(*)').eq('cliente_id', clienteId)
         ]);
 
-        const processos = processosData || [];
-        const faturas = faturasData || [];
+        const listaProcessos: any[] = processosData || [];
+        const listaFaturas: any[] = faturasData || [];
 
-        const totalCausa = processos.reduce((acc, p) => acc + (Number(p.valor_causa) || 0), 0);
-        const totalFaturado = faturas.reduce((acc, f) => acc + (Number(f.valor) || 0), 0);
+        const totalCausa = listaProcessos.reduce((acc: number, p: any) => acc + (Number(p.valor_causa) || 0), 0);
+        const totalFaturado = listaFaturas.reduce((acc: number, f: any) => acc + (Number(f.valor) || 0), 0);
         
         let totalPago = 0;
-        faturas.forEach(f => {
+        listaFaturas.forEach((f: any) => {
           if (f.pagamentos && Array.isArray(f.pagamentos)) {
             f.pagamentos.forEach((pg: any) => {
               totalPago += Number(pg.valor_pago) || 0;
@@ -47,10 +47,10 @@ export function ModalDetalhesCliente({ clienteId, onClose }: ModalDetalhesClient
 
         setDetalhes({
           cliente: clienteData,
-          processos,
-          faturas,
+          processos: listaProcessos,
+          faturas: listaFaturas,
           resumo: {
-            totalProcessos: processos.length,
+            totalProcessos: listaProcessos.length,
             totalCausa,
             totalFaturado,
             totalPago,
@@ -82,6 +82,7 @@ export function ModalDetalhesCliente({ clienteId, onClose }: ModalDetalhesClient
   const cardItemBg = isDark ? 'bg-[#090D16] border-slate-800/80' : 'bg-slate-50 border-slate-200';
   const textTitle = isDark ? 'text-white' : 'text-slate-900';
   const textSub = isDark ? 'text-slate-400' : 'text-slate-500';
+  const subText = textSub;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-150 font-sans">
@@ -103,7 +104,7 @@ export function ModalDetalhesCliente({ clienteId, onClose }: ModalDetalhesClient
               </span>
             </div>
 
-            <h2 className={`text-lg font-serif font-bold uppercase tracking-wider ${textTitle}`}>
+            <h2 className={`text-lg font-bold uppercase tracking-wider ${textTitle}`}>
               {detalhes?.cliente?.nome || 'Ficha Cadastral do Cliente'}
             </h2>
             <p className={`text-xs mt-0.5 ${textSub}`}>
@@ -132,32 +133,32 @@ export function ModalDetalhesCliente({ clienteId, onClose }: ModalDetalhesClient
               {/* KPIs de Resumo */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div className={`p-3.5 rounded-md border ${cardItemBg}`}>
-                  <span className={`text-[10px] uppercase font-mono tracking-wider block font-semibold ${textSub}`}>Processos</span>
-                  <span className={`text-xl font-serif font-bold mt-1 block ${textTitle}`}>
+                  <span className={`text-[10px] uppercase font-mono tracking-wider block font-semibold ${subText}`}>Processos</span>
+                  <span className={`text-xl font-bold font-mono mt-1 block ${textTitle}`}>
                     {detalhes.resumo.totalProcessos}
                   </span>
                 </div>
                 <div className={`p-3.5 rounded-md border ${cardItemBg}`}>
-                  <span className={`text-[10px] uppercase font-mono tracking-wider block font-semibold ${textSub}`}>Volume em Causa</span>
-                  <span className="text-lg font-mono font-bold text-blue-500 mt-1 block">
+                  <span className={`text-[10px] uppercase font-mono tracking-wider block font-semibold ${subText}`}>Volume em Causa</span>
+                  <span className="text-lg font-mono font-bold text-blue-500 mt-1 block tabular-nums">
                     {formatarMoeda(detalhes.resumo.totalCausa)}
                   </span>
                 </div>
                 <div className={`p-3.5 rounded-md border ${cardItemBg}`}>
-                  <span className={`text-[10px] uppercase font-mono tracking-wider block font-semibold ${textSub}`}>Honorários Pagos</span>
-                  <span className="text-lg font-mono font-bold text-emerald-500 mt-1 block">
+                  <span className={`text-[10px] uppercase font-mono tracking-wider block font-semibold ${subText}`}>Honorários Pagos</span>
+                  <span className="text-lg font-mono font-bold text-emerald-500 mt-1 block tabular-nums">
                     {formatarMoeda(detalhes.resumo.totalPago)}
                   </span>
                 </div>
                 <div className={`p-3.5 rounded-md border ${cardItemBg}`}>
-                  <span className={`text-[10px] uppercase font-mono tracking-wider block font-semibold ${textSub}`}>Saldo Pendente</span>
-                  <span className={`text-lg font-mono font-bold mt-1 block ${detalhes.resumo.totalPendente > 0 ? 'text-amber-500' : textSub}`}>
+                  <span className={`text-[10px] uppercase font-mono tracking-wider block font-semibold ${subText}`}>Saldo Pendente</span>
+                  <span className={`text-lg font-mono font-bold mt-1 block tabular-nums ${detalhes.resumo.totalPendente > 0 ? 'text-amber-500' : subText}`}>
                     {formatarMoeda(detalhes.resumo.totalPendente)}
                   </span>
                 </div>
               </div>
 
-              {/* Seção 1: Processos Judiciais */}
+              {/* Processos Judiciais */}
               <div>
                 <div className="flex justify-between items-center mb-3">
                   <h3 className={`text-xs font-semibold uppercase tracking-wider flex items-center gap-2 ${textTitle}`}>
@@ -196,7 +197,7 @@ export function ModalDetalhesCliente({ clienteId, onClose }: ModalDetalhesClient
                           <div className={`text-[11px] flex gap-4 ${textSub}`}>
                             <span>Advogado: <strong className={isDark ? 'text-slate-300' : 'text-slate-700'}>{proc.responsavel}</strong></span>
                             <span>Fase: <strong className={isDark ? 'text-slate-300' : 'text-slate-700'}>{proc.etapa_atual}</strong></span>
-                            <span className="font-mono text-emerald-500 font-semibold">
+                            <span className="font-mono text-emerald-500 font-semibold tabular-nums">
                               Êxito: {Math.round((proc.prob_sucesso || 0) * 100)}%
                             </span>
                           </div>
@@ -204,7 +205,7 @@ export function ModalDetalhesCliente({ clienteId, onClose }: ModalDetalhesClient
 
                         <div className="text-right">
                           <span className={`text-[10px] uppercase font-mono block ${textSub}`}>Valor em Causa</span>
-                          <span className={`font-mono font-bold text-xs ${textTitle}`}>
+                          <span className={`font-mono font-bold text-xs tabular-nums ${textTitle}`}>
                             {formatarMoeda(proc.valor_causa)}
                           </span>
                         </div>
@@ -214,7 +215,7 @@ export function ModalDetalhesCliente({ clienteId, onClose }: ModalDetalhesClient
                 )}
               </div>
 
-              {/* Seção 2: Histórico Financeiro */}
+              {/* Histórico Financeiro */}
               <div>
                 <h3 className={`text-xs font-semibold uppercase tracking-wider mb-3 flex items-center gap-2 ${textTitle}`}>
                   <IconUsers className="w-3.5 h-3.5 text-amber-500" />
@@ -260,11 +261,11 @@ export function ModalDetalhesCliente({ clienteId, onClose }: ModalDetalhesClient
                           </div>
 
                           <div className="text-right">
-                            <span className={`text-xs font-bold font-mono block ${textTitle}`}>
+                            <span className={`text-xs font-bold font-mono block tabular-nums ${textTitle}`}>
                               {formatarMoeda(valorFatura)}
                             </span>
                             {pagoNaFat > 0 && (
-                              <span className="text-[10px] text-emerald-500 font-mono">
+                              <span className="text-[10px] text-emerald-500 font-mono tabular-nums">
                                 Quitado: {formatarMoeda(pagoNaFat)}
                               </span>
                             )}

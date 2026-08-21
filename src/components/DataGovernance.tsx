@@ -73,22 +73,22 @@ export function DataGovernance() {
           supabase.from('pagamentos').select('pagamento_id, fatura_id, valor_pago')
         ]);
 
-        const listaClientes = clientes || [];
-        const listaProcessos = processos || [];
-        const listaFaturas = faturas || [];
-        const listaPagamentos = pagamentos || [];
+        const listaClientes: any[] = clientes || [];
+        const listaProcessos: any[] = processos || [];
+        const listaFaturas: any[] = faturas || [];
+        const listaPagamentos: any[] = pagamentos || [];
 
         setTabelaProcessos(listaProcessos);
 
-        const idsClientesValidos = new Set(listaClientes.map(c => c.cliente_id));
-        const processosSemCliente = listaProcessos.filter(p => !idsClientesValidos.has(p.cliente_id)).length;
+        const idsClientesValidos = new Set(listaClientes.map((c: any) => c.cliente_id));
+        const processosSemCliente = listaProcessos.filter((p: any) => !idsClientesValidos.has(p.cliente_id)).length;
 
-        const idsFaturasValidas = new Set(listaFaturas.map(f => f.fatura_id));
-        const pagamentosOrfaos = listaPagamentos.filter(pg => !idsFaturasValidas.has(pg.fatura_id)).length;
+        const idsFaturasValidas = new Set(listaFaturas.map((f: any) => f.fatura_id));
+        const pagamentosOrfaos = listaPagamentos.filter((pg: any) => !idsFaturasValidas.has(pg.fatura_id)).length;
 
         let totalCamposProcessos = listaProcessos.length * 7;
         let preenchidos = 0;
-        listaProcessos.forEach(p => {
+        listaProcessos.forEach((p: any) => {
           if (p.numero_processo) preenchidos++;
           if (p.area) preenchidos++;
           if (p.tipo) preenchidos++;
@@ -127,7 +127,7 @@ export function DataGovernance() {
     const colunas = ['processo_id', 'numero_processo', 'area', 'tipo', 'responsavel', 'etapa_atual', 'valor_causa', 'prob_sucesso'];
     const cabecalho = colunas.join(';');
     
-    const linhas = tabelaProcessos.map(p => 
+    const linhas = tabelaProcessos.map((p: any) => 
       colunas.map(col => {
         let val = p[col] ?? '';
         if (typeof val === 'string') val = `"${val.replace(/"/g, '""')}"`;
@@ -153,7 +153,7 @@ export function DataGovernance() {
     filtroTabelaDicionario === 'todas' || item.tabela === filtroTabelaDicionario
   );
 
-  const processosTabelaFiltrados = tabelaProcessos.filter(p => {
+  const processosTabelaFiltrados = tabelaProcessos.filter((p: any) => {
     const termo = buscaTabela.toLowerCase().trim();
     if (!termo) return true;
     return (
@@ -175,7 +175,7 @@ export function DataGovernance() {
   return (
     <div className="space-y-6 font-sans">
       
-      {/* Sub-Abas com visual refinado */}
+      {/* Sub-Abas */}
       <div className={`flex flex-wrap gap-2 border-b pb-3 ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
         <button
           onClick={() => setSubAba('qualidade')}
@@ -235,7 +235,7 @@ export function DataGovernance() {
         </button>
       </div>
 
-      {/* Sub-Aba 1: Qualidade de Dados & LGPD */}
+      {/* Sub-Aba 1: Qualidade de Dados */}
       {subAba === 'qualidade' && metricas && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -467,7 +467,7 @@ export function DataGovernance() {
               </div>
             </div>
 
-            {/* Relações com badges sóbrios */}
+            {/* Relações */}
             <div className={`mt-6 pt-4 border-t flex flex-wrap gap-4 text-xs ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
               <span className={`px-3 py-1.5 rounded border font-mono text-[11px] ${
                 isDark ? 'bg-[#090D16] border-slate-800 text-slate-300' : 'bg-slate-50 border-slate-200 text-slate-700'
@@ -600,7 +600,7 @@ export function DataGovernance() {
                 </tr>
               </thead>
               <tbody className={`divide-y font-mono text-[11px] ${isDark ? 'divide-slate-800/60' : 'divide-slate-100'}`}>
-                {processosTabelaFiltrados.map(proc => (
+                {processosTabelaFiltrados.map((proc: any) => (
                   <tr key={proc.processo_id} className={isDark ? 'hover:bg-slate-800/30' : 'hover:bg-slate-50'}>
                     <td className={`p-3.5 ${subText}`}>#{proc.processo_id}</td>
                     <td className="p-3.5 text-blue-500 font-medium">{proc.numero_processo}</td>
