@@ -1,4 +1,3 @@
-Markdown
 # ⚖️ LexData SaaS - Legal Intelligence & Business Analytics
 
 ![React](https://img.shields.io/badge/React-19.0-61DAFB?logo=react&logoColor=black&style=for-the-badge)
@@ -46,64 +45,61 @@ A base de dados foi projetada visando integridade referencial estrita e ausênci
 [ clientes ] 1 ─── N [ processos ]
 [ clientes ] 1 ─── N [ faturas ]
 [ faturas ]  1 ─── N [ pagamentos ]
-Clientes: Entidade mestre (cliente_id PK). Minimiza duplicação de dados cadastrais.
 
-Processos: Armazena autos e metadados (processo_id PK, cliente_id FK). Define a responsabilidade do advogado e probabilidade de êxito.
+- Clientes: Entidade mestre (cliente_id PK). Minimiza duplicação de dados cadastrais.
 
-Faturas & Pagamentos: Separação contábil entre a emissão da cobrança e as liquidações parciais/totais em fluxo de caixa.
+- Processos: Armazena autos e metadados (processo_id PK, cliente_id FK). Define a responsabilidade do advogado e probabilidade de êxito.
 
-🛡️ Governança e Segurança de Dados
-Minimização de Privilégios (RBAC): Os advogados associados não possuem acesso ao faturamento global do escritório, nem aos processos/clientes conduzidos exclusivamente por outros colegas. Isso evita conflito de interesses e vazamento de carteira.
+- Faturas & Pagamentos: Separação contábil entre a emissão da cobrança e as liquidações parciais/totais em fluxo de caixa.
 
-Conformidade LGPD/GDPR: O sistema minimiza a exposição de dados pessoais. O cliente_id anonimiza as chaves relacionais, limitando o acesso da camada de visualização apenas ao que é estritamente necessário para o perfil logado.
+Governança e Segurança de Dados
 
-Auditoria Contínua: A plataforma possui um scanner que avalia o schema e calcula a taxa de completude dos autos judiciais e averigua vínculos órfãos de relacionamentos.
+1 - Minimização de Privilégios (RBAC): Os advogados associados não possuem acesso ao faturamento global do escritório, nem aos processos/clientes conduzidos exclusivamente por outros colegas. Isso evita conflito de interesses e vazamento de carteira.
 
-💻 Como Rodar o Projeto Localmente
+2 - Conformidade LGPD/GDPR: O sistema minimiza a exposição de dados pessoais. O cliente_id anonimiza as chaves relacionais, limitando o acesso da camada de visualização apenas ao que é estritamente necessário para o perfil logado.
+
+3 - Auditoria Contínua: A plataforma possui um scanner que avalia o schema e calcula a taxa de completude dos autos judiciais e averigua vínculos órfãos de relacionamentos.
+
+
+Como Rodar o Projeto Localmente
+
 Pré-requisitos
-Node.js v18+
+- Node.js v18+
 
-Gestor de pacotes (npm, pnpm ou yarn)
+- Gestor de pacotes (npm, pnpm ou yarn)
 
-Conta no Supabase (para as chaves de API)
+- Conta no Supabase (para as chaves de API)
 
-1. Clonar o repositório
-Bash
+Clonar o repositório
+
 git clone [https://github.com/seu-usuario/lexdata-saas.git](https://github.com/seu-usuario/lexdata-saas.git)
 cd lexdata-saas
-2. Instalar dependências
-Bash
+
+Instalar dependências
+
 npm install
-3. Variáveis de Ambiente
+
+Variáveis de Ambiente
 Crie um ficheiro .env na raiz do projeto e adicione as suas credenciais do Supabase:
 
-Fragmento do código
 VITE_SUPABASE_URL=sua_url_do_supabase_aqui
 VITE_SUPABASE_ANON_KEY=sua_chave_anon_do_supabase_aqui
-4. Executar o servidor de desenvolvimento
-Bash
+
+Executar o servidor de desenvolvimento
+
 npm run dev
-A aplicação estará disponível em http://localhost:5173.
-
-🛠️ Stack Tecnológica
-Frontend: React 19, TypeScript, Vite
-
-Estilização: Tailwind CSS v4
-
-Backend as a Service (BaaS): Supabase (PostgreSQL, Auth, PostgREST API)
-
-Deploy e CI/CD: Vercel
-
-Ícones: SVG customizados (Lucide-inspired)
-
-Desenvolvido com rigor técnico e foco em governança de dados corporativos. 📊
+A aplicação estará disponível em http://localhost:5173
 
 
-### O que fazer agora?
+Stack Tecnológica
+- Frontend: React 19, TypeScript, Vite
 
-1. No terminal, execute:
-   ```bash
-   git add README.md
-   git commit -m "docs: create professional README for project presentation"
-   git push origin main
-Ao acessar o seu repositório no GitHub, você verá esta apresentação linda renderizada logo abaixo dos seus arquivos, pronta para impressionar quem for avaliar o seu código.
+- Estilização: Tailwind CSS v4
+
+- Backend as a Service (BaaS): Supabase (PostgreSQL, Auth, PostgREST API)
+
+- Deploy e CI/CD: Vercel
+
+- Ícones: SVG customizados (Lucide-inspired)
+
+- Desenvolvido com rigor técnico e foco em governança de dados corporativos. 📊
